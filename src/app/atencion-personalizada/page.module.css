@@ -1,0 +1,36 @@
+.hero { display: grid; grid-template-columns: 1fr 1fr; gap: 8%; max-width: 1320px; margin: auto; padding: 65px 5% 55px; }
+.copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding-bottom: 65px; }
+.kicker { color: var(--color-gold); letter-spacing: .16em; font-size: .58rem; display: block; margin-bottom: 25px; line-height: 1.7; }
+.copy h1 { font-size: clamp(3.6rem, 6vw, 5.8rem); line-height: 1; letter-spacing: -.035em; white-space: pre-line; }
+.copy > p { font-size: .85rem; line-height: 1.9; color: var(--color-gray-light); max-width: 360px; margin: 28px 0; }
+.primary { display: inline-flex; align-items: center; justify-content: center; gap: 30px; background: var(--color-gold); color: white; padding: 17px 25px; font-size: .73rem; transition: background .2s; }
+.primary:hover { background: var(--color-gold-deep); }
+.signature { display: flex; align-items: center; gap: 16px; margin-top: 40px; }
+.signature span { height: 1px; width: 35px; background: var(--color-gold-soft); }
+.signature em { font-family: var(--font-playfair), serif; font-size: 1.15rem; color: var(--color-gold); }
+.steps { padding: 58px max(5%, calc((100vw - 1188px) / 2)); background: var(--surface-warm); display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px; }
+.steps svg { color: var(--color-gold); stroke-width: 1.2; margin-bottom: 24px; }
+.steps article > span { display: block; font-size: .55rem; letter-spacing: .13em; color: var(--color-gold); }
+.steps h2 { font-size: 1.9rem; margin: 17px 0 12px; }
+.steps p { font-size: .75rem; color: var(--color-gray-light); line-height: 1.9; }
+.consultation { max-width: 1188px; padding: 90px 5%; margin: auto; display: grid; grid-template-columns: 1fr 1.15fr; gap: 12%; }
+.consultationCopy h2 { font-size: clamp(3.4rem, 5vw, 4.5rem); line-height: 1; margin-bottom: 25px; }
+.consultationCopy h2 em { color: var(--color-gold); }
+.consultationCopy p { font-size: .8rem; color: var(--color-gray-light); line-height: 1.9; }
+.consultationCopy small { display: block; font-size: .66rem; color: var(--color-gray-light); line-height: 1.8; margin-top: 17px; }
+.consultationCopy a { display: inline-flex; gap: 15px; align-items: center; font-size: .65rem; border-bottom: 1px solid var(--color-border); padding: 12px 0; margin-top: 20px; }
+.form { padding: 35px; border: 1px solid var(--color-border); background: var(--color-white); align-self: start; }
+.formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.form label { display: flex; flex-direction: column; gap: 12px; font-size: .67rem; margin-bottom: 24px; }
+.form label > span { color: var(--color-gray-light); font-size: .6rem; }
+.form select, .form textarea { border: 0; border-bottom: 1px solid var(--color-border); background: var(--color-ivory); padding: 12px; color: var(--color-black); font-size: .75rem; width: 100%; border-radius: 0; }
+.form textarea { resize: vertical; min-height: 120px; line-height: 1.8; }
+.form .primary { width: 100%; }
+.formNote { font-size: .6rem; line-height: 1.8; color: var(--color-gray-light); margin-top: 15px; }
+.questions { padding: 30px 6% 85px; max-width: 850px; margin: auto; }
+.questions h2 { font-size: 2.7rem; margin-bottom: 30px; }
+.questions details { padding: 22px 0; border-top: 1px solid var(--color-border); }
+.questions summary { font-size: .82rem; cursor: pointer; line-height: 1.7; }
+.questions details p { font-size: .75rem; line-height: 1.9; color: var(--color-gray-light); margin-top: 15px; }
+@media (max-width: 900px) { .hero { gap: 5%; } .steps { gap: 30px; } .consultation { gap: 6%; } .form { padding: 25px; } }
+@media (max-width: 700px) { .hero { grid-template-columns: 1fr; padding: 40px 6%; gap: 35px; } .copy { padding-bottom: 0; } .copy h1 { font-size: clamp(3.4rem, 12vw, 4.8rem); } .signature { margin-top: 25px; } .steps { grid-template-columns: 1fr; padding: 42px 8%; gap: 35px; } .steps svg { margin-bottom: 15px; } .consultation { grid-template-columns: 1fr; padding: 50px 6%; gap: 30px; } .formRow { grid-template-columns: 1fr; gap: 0; } .questions { padding-bottom: 55px; } }

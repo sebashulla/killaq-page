@@ -1,0 +1,13 @@
+.intro { position: fixed; inset: 0; background: #090909; color: #f4eddf; z-index: 2000; display: grid; place-items: center; overflow: hidden; }
+.grain { position: absolute; inset: 0; background: radial-gradient(ellipse at center, #8c704324, transparent 65%); }
+.orbit { position: absolute; width: min(70vw, 620px); aspect-ratio: 1; border: 1px solid #d8c49b50; border-radius: 50%; }
+.wordmark { position: absolute; display: grid; justify-items: center; gap: 16px; }
+.wordmark > span { color: var(--color-gold-soft); font-family: var(--font-playfair), serif; font-size: clamp(3rem, 8vw, 6rem); letter-spacing: .22em; padding-left: .22em; }
+.wordmark small { font-size: .6rem; letter-spacing: .4em; }
+.mark { width: 44px; height: 44px; color: var(--color-gold-soft); }
+.ring { position: absolute; width: min(72vw, 460px); aspect-ratio: 1; }
+.ringImage { object-fit: contain; }
+.caption { position: absolute; bottom: 19%; font-family: var(--font-playfair), serif; font-size: clamp(1.3rem, 4vw, 1.8rem); }
+.skip { position: absolute; right: 6%; bottom: 7%; border: none; border-bottom: 1px solid #d8c49b80; padding: 10px 0; background: none; color: #f4eddf; font-size: .72rem; cursor: pointer; }
+.skip span { margin-left: 15px; }
+.progress { position: absolute; bottom: 0; left: 0; height: 2px; width: 100%; background: var(--color-gold-soft); transform-origin: left; }

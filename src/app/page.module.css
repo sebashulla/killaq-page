@@ -1,0 +1,59 @@
+.main { overflow: clip; }
+.promiseBar { border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 22px max(4%, calc((100vw - 1320px) / 2)); display: flex; justify-content: space-between; align-items: center; gap: 20px; font-size: .64rem; color: var(--color-gray-light); }
+.promiseBar > span { display: flex; align-items: center; gap: 12px; }
+.promiseBar svg { color: var(--color-gold); stroke-width: 1.2; }
+.promisePlace { font-size: .52rem; letter-spacing: .12em; }
+.section, .selection { max-width: 1440px; margin: auto; padding: 82px 4%; }
+.sectionHeader { display: flex; justify-content: space-between; align-items: flex-end; gap: 25px; margin-bottom: 34px; }
+.kicker { display: block; font-size: .57rem; letter-spacing: .18em; color: var(--color-gold); margin-bottom: 12px; }
+.sectionHeader h2 { font-size: clamp(2.2rem, 3.5vw, 3.3rem); line-height: 1.1; letter-spacing: -.025em; }
+.textLink { display: inline-flex; align-items: center; gap: 18px; font-size: .67rem; border-bottom: 1px solid var(--color-border); padding: 8px 0; flex-shrink: 0; }
+.textLink:hover { border-color: var(--color-gold); }
+.categoryGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+.categoryVisual { position: relative; aspect-ratio: 1.15; background: #171717; overflow: hidden; display: grid; place-items: center; transition: background .3s; }
+.categoryCard:nth-child(2) .categoryVisual { background: #ece9e1; }
+.categoryCard:nth-child(3) .categoryVisual { background: linear-gradient(135deg, #dfc485, #b48d43); }
+.categoryCard:nth-child(4) .categoryVisual { background: #efe8de; }
+.categoryVisual > svg { width: 58%; color: #94702d; transition: transform .4s; }
+.categoryCard:first-child .categoryVisual > svg { color: #ddbf77; }
+.categoryCard:nth-child(3) .categoryVisual > svg { color: #fffaf0; filter: drop-shadow(0 2px 2px #6f542825); }
+.categoryCard:first-child .categoryNumber, .categoryCard:first-child .categoryExplore { color: #e0c788; border-color: #d7b96e50; }
+.categoryCard:hover .categoryVisual > svg { transform: rotate(-6deg) scale(1.05); }
+.categoryNumber { position: absolute; top: 17px; left: 17px; font-size: .6rem; color: var(--color-gray-light); z-index: 1; }
+.categoryExplore { position: absolute; bottom: 15px; right: 15px; width: 30px; height: 30px; border: 1px solid #94702d40; border-radius: 50%; display: grid; place-items: center; z-index: 1; color: var(--color-black); }
+.categoryCard h3 { font-size: 1.6rem; margin-top: 17px; }
+.categoryCard p { font-size: .63rem; color: var(--color-gray-light); margin-top: 5px; line-height: 1.6; }
+.categoryImage { object-fit: cover; }
+.selection { padding-top: 0; }
+.productGrid, .skeletonGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; }
+.skeletonGrid > div { height: 340px; background: linear-gradient(90deg, #eeeae1, #f5f2ea, #eeeae1); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.catalogInvitation { display: flex; align-items: center; gap: 35px; padding: 42px; background: #f0ede5; border: 1px solid var(--color-border); }
+.invitationMark { width: 55px; height: 55px; color: var(--color-gold); }
+.catalogInvitation > div { flex: 1; }
+.catalogInvitation h3 { font-size: 1.9rem; }
+.catalogInvitation p { font-size: .75rem; color: var(--color-gray-light); line-height: 1.8; max-width: 540px; margin-top: 8px; }
+.story { display: grid; grid-template-columns: 1fr 1fr; background: #f5f0e6; }
+.storyImage { position: relative; min-height: 570px; }
+.storyImage img { object-fit: cover; }
+.storyImage > span { position: absolute; bottom: 30px; left: 8%; color: #f5eddd; font-size: .5rem; letter-spacing: .2em; }
+.storyCopy { padding: 70px clamp(30px, 6vw, 95px); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.storyMark { width: 38px; height: 38px; margin-bottom: 28px; color: var(--color-gold); }
+.storyCopy h2 { font-size: clamp(2.4rem, 4vw, 4rem); line-height: 1.05; margin: 5px 0 28px; letter-spacing: -.025em; }
+.storyCopy em { font-weight: 400; }
+.storyCopy p { font-size: .79rem; line-height: 1.9; color: var(--color-gray-light); max-width: 360px; margin-bottom: 18px; }
+.storyCopy .textLink { margin-top: 14px; }
+.benefits { max-width: 1440px; margin: auto; padding: 75px 4%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 35px; border-bottom: 1px solid var(--color-border); }
+.benefits article { border-right: 1px solid var(--color-border); padding-right: 30px; }
+.benefits article:last-child { border: 0; }
+.benefits svg { color: var(--color-gold); margin-bottom: 18px; }
+.benefits h3 { font-size: 1.4rem; margin-bottom: 10px; }
+.benefits p { font-size: .68rem; line-height: 1.9; color: var(--color-gray-light); }
+.videoGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
+.contactBand { text-align: center; padding: 80px 5%; }
+.contactBand h2 { font-size: clamp(2rem, 3.5vw, 3.2rem); max-width: 650px; margin: 0 auto 28px; }
+.contactButton { display: inline-flex; gap: 30px; align-items: center; padding: 16px 23px; border: 1px solid var(--color-ink); font-size: .7rem; transition: background .2s; }
+.contactButton:hover { background: var(--color-ink); color: white; }
+.contactText { color: var(--color-gray-light); font-size: .8rem; line-height: 1.8; margin: -10px auto 28px; }
+@media (max-width: 900px) { .promisePlace { display: none !important; } .catalogInvitation { flex-wrap: wrap; gap: 25px; } .catalogInvitation > a { margin-left: 80px; } .benefits { grid-template-columns: 1fr 1fr; gap: 30px; } .benefits article:nth-child(2) { border: 0; } .categoryGrid { gap: 14px; } .productGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .story { grid-template-columns: 1fr; } .storyImage { min-height: 390px; } .storyCopy { padding: 45px 8%; } .categoryGrid { grid-template-columns: 1fr 1fr; row-gap: 28px; } .section, .selection { padding: 50px 6%; } .selection { padding-top: 0; } .sectionHeader { gap: 16px; flex-wrap: wrap; } .sectionHeader h2 { font-size: 2.35rem; } .promiseBar { padding: 20px 6%; gap: 16px; flex-wrap: wrap; justify-content: center; font-size: .56rem; } .promiseBar > span { gap: 7px; } .promiseBar > span:nth-child(3) { display: none; } .categoryCard h3 { font-size: 1.5rem; margin-top: 12px; } .categoryCard p { font-size: .58rem; } .catalogInvitation { padding: 26px; flex-direction: column; align-items: flex-start; } .catalogInvitation h3 { font-size: 1.7rem; } .catalogInvitation > a { margin: 0; } .benefits { padding: 45px 6%; gap: 25px; } .benefits article { padding-right: 15px; } .benefits h3 { font-size: 1.3rem; } .benefits p { font-size: .65rem; } .videoGrid { grid-template-columns: 1fr; } .skeletonGrid { grid-template-columns: 1fr 1fr; } .skeletonGrid > div { height: 240px; } .contactBand { padding: 55px 6%; } }

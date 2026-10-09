@@ -1,0 +1,4 @@
+.brand { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
+.name { color: var(--color-gold); position: relative; font-family: var(--font-playfair), Georgia, serif; font-weight: 500; font-size: 2.2rem; line-height: 1; letter-spacing: .14em; }
+.star { position: absolute; right: -14px; top: -4px; font-size: .85rem; letter-spacing: 0; color: var(--color-gold); }
+.tagline { font-size: .48rem; letter-spacing: .35em; padding-left: .18em; }

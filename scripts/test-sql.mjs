@@ -1,0 +1,112 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+
+// Supabase-compatible local fixture. No connection or write to the remote project.
+const db = new PGlite();
+const admin = '00000000-0000-0000-0000-000000000001';
+const customer = '00000000-0000-0000-0000-000000000002';
+const other = '00000000-0000-0000-0000-000000000003';
+const published = '00000000-0000-0000-0000-000000000011';
+const hidden = '00000000-0000-0000-0000-000000000012';
+await db.exec(`
+  CREATE ROLE anon; CREATE ROLE authenticated;
+  CREATE SCHEMA auth; CREATE SCHEMA storage;
+  CREATE TABLE auth.users(id UUID PRIMARY KEY);
+  CREATE FUNCTION auth.uid() RETURNS UUID LANGUAGE sql STABLE AS $$ SELECT NULLIF(current_setting('request.jwt.claim.sub', true),'')::uuid $$;
+  CREATE FUNCTION auth.role() RETURNS TEXT LANGUAGE sql STABLE AS $$ SELECT current_setting('request.jwt.claim.role', true) $$;
+  CREATE TABLE public.profiles(id UUID PRIMARY KEY, role TEXT DEFAULT 'customer', full_name TEXT);
+  CREATE FUNCTION public.is_admin() RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER AS $$ SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') $$;
+  CREATE TABLE public.products(id UUID PRIMARY KEY, is_active BOOLEAN DEFAULT true, stock INT DEFAULT 1);
+  CREATE TABLE public.product_images(id SERIAL PRIMARY KEY, product_id UUID REFERENCES public.products(id), url TEXT);
+  CREATE TABLE public.hero_slides(id SERIAL PRIMARY KEY, title TEXT NOT NULL, subtitle TEXT, cta_text TEXT, cta_url TEXT, image_url TEXT NOT NULL, image_alt TEXT, sort_order INT DEFAULT 0, is_active BOOLEAN DEFAULT true);
+  ALTER TABLE public.hero_slides ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY hero_read ON public.hero_slides FOR SELECT USING (is_active OR public.is_admin());
+  CREATE POLICY hero_admin ON public.hero_slides FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+  CREATE TABLE public.reviews(id SERIAL PRIMARY KEY, user_id UUID, product_id UUID, is_approved BOOLEAN DEFAULT false, comment TEXT);
+  CREATE TABLE public.orders(id SERIAL PRIMARY KEY, user_id UUID, status TEXT DEFAULT 'pending', payment_status TEXT DEFAULT 'pending', payment_ref TEXT, total NUMERIC DEFAULT 0, created_at TIMESTAMPTZ DEFAULT now());
+  CREATE TABLE storage.buckets(id TEXT PRIMARY KEY, name TEXT, public BOOLEAN, file_size_limit BIGINT, allowed_mime_types TEXT[]);
+  CREATE TABLE storage.objects(id SERIAL PRIMARY KEY, bucket_id TEXT, name TEXT);
+  ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY profile_read ON public.profiles FOR SELECT USING (id = auth.uid() OR public.is_admin());
+  CREATE POLICY profile_update ON public.profiles FOR UPDATE USING (id = auth.uid() OR public.is_admin());
+  CREATE POLICY profile_insert ON public.profiles FOR INSERT WITH CHECK (id = auth.uid());
+  ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY product_read ON public.products FOR SELECT USING (is_active OR public.is_admin());
+  ALTER TABLE public.product_images ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY review_read ON public.reviews FOR SELECT USING (is_approved OR user_id = auth.uid() OR public.is_admin());
+  CREATE POLICY review_insert ON public.reviews FOR INSERT WITH CHECK (user_id = auth.uid() OR public.is_admin());
+  CREATE POLICY review_update ON public.reviews FOR UPDATE USING (user_id = auth.uid() OR public.is_admin());
+  ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+  GRANT USAGE ON SCHEMA public, auth, storage TO anon, authenticated;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO anon, authenticated;
+  GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
+  INSERT INTO auth.users VALUES ('${admin}'), ('${customer}'), ('${other}');
+  INSERT INTO public.profiles VALUES ('${admin}','admin','Owner'), ('${customer}','customer','Customer');
+  INSERT INTO public.products VALUES ('${published}', true, 3), ('${hidden}', false, 0);
+  INSERT INTO public.product_images(product_id,url) VALUES ('${published}','active.jpg'), ('${hidden}','hidden.jpg');
+  INSERT INTO public.hero_slides(title,subtitle,cta_text,cta_url,image_url) VALUES
+    ('Colección Matrimonio','Sella tu promesa con el brillo de nuestros diamantes exclusivos.','VER CATÁLOGO','/colecciones/matrimonio','/images/hero-bg.png'),
+    ('Nueva Colección Eternidad','Descubre piezas únicas diseñadas para brillar eternamente.','VER CATÁLOGO','/colecciones/eternidad','/images/product-1.png'),
+    ('Owner campaign','Own copy','Discover','/colecciones','https://example.com/custom.png'),
+    ('Colección Matrimonio','Owner edited this message','VER CATÁLOGO','/colecciones/matrimonio','/images/hero-bg.png');
+`);
+const migrations = await Promise.all(['001_restore_media.sql', '002_harden_store_permissions.sql', '003_restore_complaints_book.sql', '004_brand_and_storefront.sql'].map(name => readFile(new URL(`../src/sql/${name}`, import.meta.url), 'utf8')));
+for (let pass = 0; pass < 2; pass++) for (const sql of migrations) await db.exec(sql);
+console.log('PASS: all four SQL migrations execute twice without error');
+assert.equal((await db.query("SELECT image_url FROM public.hero_slides WHERE title = 'Owner campaign'")).rows[0].image_url, 'https://example.com/custom.png');
+assert.equal((await db.query("SELECT is_active FROM public.hero_slides WHERE title = 'Nueva Colección Eternidad'")).rows[0].is_active, false);
+assert.equal((await db.query("SELECT background_style FROM public.hero_slides WHERE image_url = '/images/killaq-ring-v2.png'")).rows[0].background_style, 'black');
+assert.equal((await db.query("SELECT title FROM public.hero_slides WHERE subtitle = 'Owner edited this message'")).rows[0].title, 'Colección Matrimonio');
+await db.exec(`INSERT INTO public.product_videos(product_id,url,is_active) VALUES ('${published}','visible.mp4',true), ('${published}','draft.mp4',false), ('${hidden}','hidden.mp4',true); INSERT INTO public.social_videos(title,video_url,is_active) VALUES ('Active','active.mp4',true), ('Draft','draft.mp4',false);`);
+
+async function session(role, user = '') {
+  await db.exec('RESET ROLE');
+  await db.query("SELECT set_config('request.jwt.claim.role', $1, false), set_config('request.jwt.claim.sub', $2, false)", [role, user]);
+  await db.exec(`SET ROLE ${role}`);
+}
+await session('anon');
+assert.equal((await db.query("SELECT value FROM public.site_settings WHERE key = 'storefront'")).rows[0].value.hero_autoplay, false);
+await assert.rejects(db.query("INSERT INTO public.site_settings(key) VALUES ('malicious')"), /permission denied|row-level security/);
+assert.equal((await db.query('SELECT * FROM public.product_videos')).rows.length, 1);
+assert.equal((await db.query('SELECT * FROM public.social_videos')).rows.length, 1);
+assert.equal((await db.query('SELECT * FROM public.product_images')).rows.length, 1);
+await assert.rejects(db.query('SELECT * FROM public.admin_dashboard_stats'), /permission denied/);
+console.log('PASS: anonymous visitors see only published media and cannot read dashboard stats');
+await db.query("INSERT INTO public.complaints_book(full_name,document_number,phone,detail,request) VALUES ('Test Customer','00000000','900000000','Test complaint detail','Test request')");
+assert.equal((await db.query('SELECT * FROM public.complaints_book')).rows.length, 0);
+await assert.rejects(db.query("INSERT INTO public.complaints_book(full_name,document_number,phone,detail,request,status) VALUES ('Test Customer','00000000','900000000','Test complaint detail','Test request','closed')"), /row-level security/);
+console.log('PASS: complaint submission is public, personal records are private, and customers cannot pre-close claims');
+await session('authenticated', customer);
+assert.equal((await db.query("UPDATE public.site_settings SET value = '{}' WHERE key = 'storefront' RETURNING key")).rows.length, 0);
+await assert.rejects(db.query("INSERT INTO public.site_settings(key) VALUES ('malicious')"), /row-level security/);
+assert.equal((await db.query("UPDATE public.hero_slides SET background_style = 'gold' RETURNING id")).rows.length, 0);
+assert.equal((await db.query('SELECT * FROM public.admin_dashboard_stats')).rows.length, 0);
+await assert.rejects(db.query("UPDATE public.profiles SET role = 'admin' WHERE id = $1", [customer]), /Solo un administrador/);
+await db.query("UPDATE public.profiles SET full_name = 'Updated' WHERE id = $1", [customer]);
+await assert.rejects(db.query("INSERT INTO public.reviews(user_id,product_id,is_approved) VALUES ($1,$2,true)", [customer,published]), /requiere moderación/);
+await db.query("INSERT INTO public.reviews(user_id,product_id,comment) VALUES ($1,$2,'Nice')", [customer,published]);
+await assert.rejects(db.query('UPDATE public.reviews SET is_approved = true'), /moderación/);
+await assert.rejects(db.query("INSERT INTO public.orders(user_id,payment_status) VALUES ($1,'paid')", [customer]), /row-level security/);
+await db.query('INSERT INTO public.orders(user_id) VALUES ($1)', [customer]);
+console.log('PASS: customers can edit their name and create pending requests, but cannot elevate roles, approve reviews, or claim payment');
+await session('authenticated', other);
+await assert.rejects(db.query("INSERT INTO public.profiles(id,role) VALUES ($1,'admin')", [other]), /Rol no permitido/);
+await session('authenticated', admin);
+await db.query("UPDATE public.site_settings SET value = jsonb_set(value, '{hero_autoplay}', 'true') WHERE key = 'storefront'");
+await db.query("UPDATE public.hero_slides SET jewelry_tone = 'silver', background_style = 'auto', image_fit = 'contain' WHERE title = 'Owner campaign'");
+await assert.rejects(db.query("UPDATE public.hero_slides SET background_style = 'green' WHERE title = 'Owner campaign'"), /check constraint/);
+assert.equal((await db.query('SELECT * FROM public.admin_dashboard_stats')).rows.length, 1);
+assert.equal((await db.query('SELECT * FROM public.product_videos')).rows.length, 3);
+assert.equal((await db.query('SELECT * FROM public.complaints_book')).rows.length, 1);
+await db.query('UPDATE public.reviews SET is_approved = true');
+await db.query("INSERT INTO public.orders(user_id,payment_status) VALUES ($1,'paid')", [customer]);
+console.log('PASS: administrators retain media management, moderation and stats access');
+await session('postgres');
+await db.exec(migrations[3]);
+assert.equal((await db.query("SELECT value FROM public.site_settings WHERE key = 'storefront'")).rows[0].value.hero_autoplay, true);
+assert.equal((await db.query("SELECT jewelry_tone FROM public.hero_slides WHERE title = 'Owner campaign'")).rows[0].jewelry_tone, 'silver');
+console.log('PASS: brand settings are public to read, admin-only to write, validate backgrounds and preserve owner changes on rerun');
+await db.close();

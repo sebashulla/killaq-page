@@ -1,0 +1,21 @@
+.page { background: var(--background); }
+.hero { display: grid; grid-template-columns: 1.15fr 1fr; max-width: 1320px; margin: auto; padding: 60px 4%; gap: 6%; }
+.copy { padding: 30px 0; }
+.mark { width: 42px; height: 42px; color: var(--color-gold); margin-bottom: 30px; }
+.copy > span, .questions > span { display: block; font-size: .65rem; letter-spacing: .16em; color: var(--color-gold); margin-bottom: 20px; }
+.copy h1 { font-size: clamp(3rem, 5.5vw, 5rem); line-height: 1; margin-bottom: 30px; letter-spacing: -.025em; }
+.copy p { max-width: 460px; color: var(--color-gray-light); font-size: .9rem; line-height: 1.9; margin-bottom: 20px; }
+.link { display: inline-flex; gap: 30px; align-items: center; border-bottom: 1px solid var(--color-border); padding: 15px 0; font-size: .8rem; }
+.visual { background: radial-gradient(ellipse, #30302e, var(--color-ink)); border-radius: 46% 46% 0 0; position: relative; min-height: 550px; }
+.visual img { object-fit: contain; padding: 35px; }
+.visual small { position: absolute; bottom: 22px; width: 100%; text-align: center; color: #d8c49b; font-size: .5rem; letter-spacing: .12em; }
+.values { background: var(--surface-warm); padding: 65px max(6%, calc((100vw - 1180px) / 2)); display: grid; grid-template-columns: repeat(3, 1fr); gap: 45px; }
+.values article > span { font-size: .65rem; color: var(--color-gold); }
+.values h2 { font-size: 1.9rem; margin: 20px 0 15px; }
+.values p { font-size: .8rem; line-height: 1.9; color: var(--color-gray-light); }
+.questions { padding: 75px 6%; max-width: 850px; margin: auto; }
+.questions h2 { font-size: 2.7rem; margin-bottom: 35px; }
+.questions details { padding: 20px 0; border-top: 1px solid var(--color-border); }
+.questions summary { font-size: .9rem; cursor: pointer; padding: 7px 0; }
+.questions p { font-size: .8rem; line-height: 1.9; color: var(--color-gray-light); margin-top: 15px; }
+@media (max-width: 700px) { .hero { grid-template-columns: 1fr; padding: 35px 6%; gap: 30px; } .visual { min-height: 420px; } .values { grid-template-columns: 1fr; padding: 45px 6%; gap: 30px; } .copy h1 { font-size: 3.4rem; } .questions { padding: 50px 6%; } }

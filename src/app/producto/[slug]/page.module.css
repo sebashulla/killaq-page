@@ -1,0 +1,238 @@
+.page {
+  min-height: 100vh;
+  padding: 60px var(--spacing-lg) var(--spacing-xl);
+  background: var(--background);
+  color: var(--color-black);
+}
+
+.detail,
+.productVideos,
+.related,
+.notFound {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+  gap: var(--spacing-xl);
+}
+
+.gallery {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.mainImage {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--surface-warm);
+  border: 1px solid var(--color-border);
+}
+
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.thumb {
+  cursor: pointer;
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface-warm);
+  border: 1px solid var(--color-border);
+}
+
+.thumb[aria-pressed="true"] { border: 2px solid var(--color-ink); }
+
+.image {
+  object-fit: cover;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  gap: var(--spacing-md);
+}
+
+.backLink,
+.meta,
+.sectionHeader span {
+  color: var(--color-gold);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: 0.78rem;
+}
+
+.info h1 {
+  font-size: 3.3rem;
+  line-height: 1.02;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-md);
+}
+
+.price {
+  color: var(--color-gold);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.comparePrice {
+  color: var(--color-gray-medium);
+  text-decoration: line-through;
+}
+
+.description {
+  color: var(--color-gray-light);
+  line-height: 1.8;
+}
+
+.optionGroup {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.optionGroup span {
+  color: var(--color-gray-medium);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+}
+
+.sizeGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.sizeButton,
+.sizeActive {
+  min-width: 44px;
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-black);
+  cursor: pointer;
+}
+
+.sizeActive {
+  background: var(--color-ink);
+  border-color: var(--color-gold);
+  color: var(--color-white);
+  font-weight: 700;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.facts div {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: var(--spacing-md);
+  background: var(--surface);
+}
+
+.facts span {
+  display: block;
+  color: var(--color-gray-medium);
+  font-size: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.facts strong {
+  color: var(--color-black);
+  font-size: 0.9rem;
+}
+
+.primaryButton {
+  min-height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.5rem;
+  background: var(--color-gold);
+  color: var(--color-white);
+  border: none;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.productVideos,
+.related {
+  padding-top: var(--spacing-xl);
+}
+
+.sectionHeader {
+  margin-bottom: var(--spacing-lg);
+}
+
+.sectionHeader h2 {
+  font-size: 2.2rem;
+}
+
+.relatedGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.videoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.notFound {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  text-align: center;
+}
+
+@media (max-width: 1000px) {
+  .detail {
+    grid-template-columns: 1fr;
+  }
+
+  .relatedGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .info h1 {
+    font-size: 2.4rem;
+  }
+
+  .facts,
+  .relatedGrid,
+  .videoGrid {
+    grid-template-columns: 1fr;
+  }
+}

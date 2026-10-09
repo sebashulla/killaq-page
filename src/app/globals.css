@@ -1,26 +1,45 @@
-@import "tailwindcss";
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-white: #ffffff;
+  --color-ivory: #fdfcf9;
+  --color-cream: #f5f0e6;
+  --color-black: #20201e;
+  --color-gray-light: #66635e;
+  --color-gray-medium: #706b62;
+  --color-gold: #94702d;
+  --color-gold-soft: #d7b96e;
+  --color-gold-pale: #f1e8d5;
+  --color-gold-deep: #6f5428;
+  --color-silver: #bcbfc4;
+  --color-rosegold: #a46f68;
+  --color-border: #e7e1d6;
+  --color-shadow: rgba(25, 23, 19, 0.08);
+  --background: var(--color-ivory);
+  --foreground: var(--color-black);
+  --surface: #ffffff;
+  --surface-warm: var(--color-cream);
+  --color-ink: #151515;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 4rem;
 }
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 130px; }
+body { background: var(--background); color: var(--foreground); font-family: var(--font-inter), Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-playfair), Georgia, serif; font-weight: 500; }
+a { color: inherit; text-decoration: none; }
+button, input, textarea, select { font: inherit; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button { touch-action: manipulation; }
+button:disabled { cursor: not-allowed; }
+svg { flex-shrink: 0; }
+::selection { background: var(--color-gold-soft); color: var(--color-ink); }
+:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 5px; }
+.skip-link { position: fixed; top: 8px; left: 16px; z-index: 3000; padding: 12px 20px; background: var(--color-ink); color: white; transform: translateY(-160%); }
+.skip-link:focus { transform: translateY(0); }
+@media (max-width: 600px) { :root { --spacing-lg: 1.25rem; --spacing-xl: 3rem; } }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }

@@ -1,0 +1,41 @@
+.navbar { position: sticky; top: -32px; width: 100%; z-index: 1000; background: #fdfcf9f5; border-bottom: 1px solid var(--color-border); backdrop-filter: blur(18px); }
+.announcement { height: 32px; background: var(--color-ink); color: #efe9db; display: flex; align-items: center; justify-content: space-between; padding: 0 max(4%, calc((100vw - 1320px) / 2)); font-size: .6rem; letter-spacing: .075em; }
+.announcement a { display: inline-flex; gap: 8px; align-items: center; }
+.topBar { display: flex; align-items: center; justify-content: space-between; max-width: 1440px; margin: auto; height: 88px; padding: 0 4%; gap: 35px; }
+.logo { color: var(--color-gold); margin-right: auto; }
+.links { display: flex; align-items: center; gap: clamp(16px, 2vw, 28px); }
+.link { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 12px 0; font-size: .75rem; cursor: pointer; color: var(--color-black); position: relative; }
+.link::after { content: ''; position: absolute; bottom: 6px; left: 0; width: 100%; height: 1px; background: var(--color-gold); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
+.link:hover::after, .link[aria-current=page]::after { transform: scaleX(1); }
+.actions { display: flex; align-items: center; gap: 13px; margin-left: 10px; }
+.icon { position: relative; width: 36px; height: 44px; display: grid; place-items: center; background: none; border: none; color: var(--color-black); cursor: pointer; }
+.icon svg { width: 19px; height: 19px; stroke-width: 1.4; }
+.count { position: absolute; top: 2px; right: -1px; min-width: 16px; height: 16px; border-radius: 50%; background: var(--color-ink); color: white; font-size: .6rem; display: grid; place-items: center; }
+.mobileToggle, .mobileAccount { display: none; }
+.shopMenu { position: absolute; left: 0; right: 0; top: 100%; background: var(--background); border-bottom: 1px solid var(--color-border); box-shadow: 0 20px 30px var(--color-shadow); padding: 28px max(4%, calc((100vw - 1320px) / 2)) 35px; }
+.shopHeading { display: flex; justify-content: space-between; gap: 20px; font-size: .72rem; padding-bottom: 22px; color: var(--color-gray-light); }
+.shopHeading a { display: flex; align-items: center; gap: 12px; color: var(--color-ink); }
+.categories { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.categories a { position: relative; display: grid; gap: 10px; border-top: 1px solid var(--color-border); padding: 20px 0; }
+.categories small { font-size: .6rem; color: var(--color-gold); }
+.categories strong { font-family: var(--font-playfair), serif; font-size: 1.8rem; font-weight: 500; }
+.categories span { font-size: .7rem; color: var(--color-gray-light); }
+.categories svg { position: absolute; top: 28px; right: 8px; }
+.search { position: absolute; top: 100%; left: 0; right: 0; display: flex; gap: 20px; align-items: center; padding: 25px max(4%, calc((100vw - 1320px) / 2)); background: var(--background); border-bottom: 1px solid var(--color-border); box-shadow: 0 20px 30px var(--color-shadow); }
+.search input { border: 0; background: transparent; outline: none; flex: 1; min-width: 0; font-size: .85rem; padding: 12px 0; color: var(--color-black); }
+.search button { display: flex; gap: 14px; align-items: center; padding: 12px 18px; background: var(--color-ink); color: white; border: 0; cursor: pointer; font-size: .75rem; }
+.signOut { margin-top: 15px; background: none; border: 0; text-decoration: underline; cursor: pointer; font-size: .75rem; }
+@media (max-width: 1100px) {
+  .topBar { height: 76px; gap: 15px; }
+  .mobileToggle { display: grid; place-items: center; width: 36px; height: 44px; border: none; background: none; color: var(--color-ink); cursor: pointer; }
+  .mobileToggle svg { width: 20px; stroke-width: 1.4; }
+  .logo { margin-right: auto; }
+  .actions { margin-left: 0; gap: 4px; }
+  .links { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--background); padding: 20px 6%; box-shadow: 0 20px 30px var(--color-shadow); max-height: calc(100dvh - 90px); overflow-y: auto; }
+  .open { display: flex; align-items: stretch; flex-direction: column; gap: 4px; }
+  .link { padding: 15px 0; }
+  .mobileAccount { display: block; font-size: .8rem; padding: 15px 0; border-top: 1px solid var(--color-border); }
+  .shopMenu { position: fixed; top: 108px; max-height: calc(100dvh - 108px); overflow-y: auto; }
+  .categories { grid-template-columns: 1fr 1fr; gap: 15px; }
+}
+@media (max-width: 500px) { .announcement { justify-content: center; font-size: .55rem; } .announcement a, .account { display: none; } .search { gap: 10px; } .search input { font-size: .75rem; } .search button { padding: 12px; } }

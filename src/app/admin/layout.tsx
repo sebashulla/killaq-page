@@ -12,6 +12,7 @@ const navItems = [
   { href: "/admin/videos", label: "Videos", icon: "VI" },
   { href: "/admin/carrusel", label: "Portada y campañas", icon: "PO" },
   { href: "/admin/experiencia", label: "Experiencia de marca", icon: "EX" },
+  { href: "/admin/exclusivos", label: "Pieza exclusiva", icon: "PE" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

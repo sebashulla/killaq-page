@@ -72,6 +72,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className={styles.quickActions}>
+        <Link href="/admin/exclusivos" className={styles.actionCard}><span>Pieza exclusiva</span><strong>Mostrar u ocultar un modelo de colección</strong></Link>
         <Link href="/admin/productos" className={styles.actionCard}>
           <span>Productos</span>
           <strong>Agregar piezas, fotos y videos</strong>

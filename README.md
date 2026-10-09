@@ -23,16 +23,25 @@ Los archivos no se ejecutaron en el proyecto remoto. Copiar cada archivo complet
 2. `src/sql/002_harden_store_permissions.sql`.
 3. `src/sql/003_restore_complaints_book.sql`.
 4. `src/sql/004_brand_and_storefront.sql`.
+5. `src/sql/005_categories_and_exclusive_showcase.sql`.
 
-Las cuatro migraciones son idempotentes, usan transacciones y se probaron en PostgreSQL local mediante PGlite. Ver `src/sql/README.md`. No volver a ejecutar el esquema base completo sobre la base existente.
+Las cinco migraciones son idempotentes, usan transacciones y se probaron en PostgreSQL local mediante PGlite. Ver `src/sql/README.md`. No volver a ejecutar el esquema base completo sobre la base existente.
 
 ## Marca y atención personalizada
 
-La paleta actual combina blanco cálido, dorado y negro. La portada queda fija sobre negro por defecto. `/atencion-personalizada` presenta una animación artesanal y prepara una consulta por WhatsApp según pieza, material e idea del visitante.
+La paleta actual combina blanco cálido, dorado y negro. La portada conserva el anillo sobre negro y agrega una segunda campaña de collares, con transición suave y controles de pausa. La rotación predeterminada es de 9 segundos y se detiene al interactuar o usar movimiento reducido. `/atencion-personalizada` presenta una animación artesanal y prepara una consulta por WhatsApp según pieza, material e idea del visitante.
 
 En `/admin/carrusel` se administran campañas, fondos y encuadres con vista previa. En `/admin/experiencia` se controlan animaciones, rotación, título, descripción y número de consultas personalizadas. Para configurar los nuevos fondos, aplicar el archivo 004. La consulta pública puede usar la composición local mientras está pendiente.
 
 Informe de esta iteración: `INFORME_REDISENO.md`.
+
+## Categorías y pieza exclusiva
+
+Anillos, Collares, Aretes, Pulseras y Charms tienen imágenes de referencia generadas y enlaces separados a sus estilos. Las imágenes propias de Supabase tienen prioridad. Originales, versiones WebP y prompts: `design-assets/IMAGENES_REFERENCIA.md`. Las referencias no crean productos ni existencias.
+
+El 005 agrega Charms y subcategorías, completa solo imágenes vacías, incorpora la segunda campaña y activa la rotación en su primera aplicación. Si se repite, conserva los ajustes posteriores del administrador. No reactiva una campaña deshabilitada.
+
+En `/admin/exclusivos` puedes crear una colección, editar el texto del apartado, elegir una pieza y mostrarla u ocultarla. En `/admin/productos`, asigna categoría, subcategoría y colección a cada modelo. El apartado solo aparece si la pieza elegida está publicada, tiene una imagen y pertenece a una colección activa; permanece oculto inicialmente.
 
 ## GitHub y Vercel
 
@@ -52,7 +61,7 @@ npm run check:supabase
 npm audit --omit=dev
 ```
 
-`npm test` verifica cantidades, stock compartido entre tallas, carrito corrupto, configuración de marca, fondos por material, idempotencia SQL y permisos de visitante, cliente y administrador. La fixture SQL local reproduce las tablas y roles usados por las migraciones; no utiliza credenciales ni escribe en Supabase.
+`npm test` verifica cantidades, stock compartido entre tallas, carrito corrupto, configuración de marca, fondos por material, categorías, visibilidad del exclusivo, idempotencia SQL y permisos de visitante, cliente y administrador. La fixture SQL local reproduce las tablas y roles usados por las migraciones; no utiliza credenciales ni escribe en Supabase.
 
 `check:supabase` solo consulta tablas con la clave pública y sus políticas RLS. Informa conteos y errores de esquema, sin imprimir claves ni registros personales.
 
@@ -72,6 +81,7 @@ Capturas de la identidad dorada: `screenshots/killaq-preview-v3.jpg`, `screensho
 - El carrito vuelve a consultar precio y stock antes de habilitar la coordinación; el equipo confirma disponibilidad y envío.
 - El teléfono y correo visibles mantienen los valores existentes en el frontend. Los `site_settings` remotos contienen números de ejemplo distintos: confirmar los canales comerciales definitivos antes de publicación.
 - No se enviaron mensajes, formularios ni pagos reales durante la revisión. No se inició sesión como administrador ni se validaron escrituras administrativas remotas.
+- La nueva sección exclusiva y la asignación de estilos se probaron en una aplicación aislada con datos locales: mostrar/ocultar, validación de pieza, creación de colección y cambio de categoría. No hubo escrituras en Supabase remoto.
 - La auditoría de dependencias de producción quedó sin vulnerabilidades reportadas. Persisten cinco avisos altos transitivos en la cadena de ESLint (`braces` / `micromatch` / `fast-glob`); `npm audit` no ofrece una corrección compatible. No se forzó un downgrade de Next.js.
 
 La dirección visual, el archivo del anillo y su prompt están documentados en `BRAND_IDENTITY.md`.

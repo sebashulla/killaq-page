@@ -1,11 +1,7 @@
 import type { Category, HeroSlide, Material, Product } from "@/types/catalog";
+import { presentCategories } from "./taxonomy";
 
-export const fallbackCategories: Category[] = [
-  { id: 1, slug: "anillos", name: "Anillos" },
-  { id: 2, slug: "collares", name: "Collares" },
-  { id: 3, slug: "aretes", name: "Aretes" },
-  { id: 4, slug: "pulseras", name: "Pulseras" },
-];
+export const fallbackCategories: Category[] = presentCategories(null);
 
 export const fallbackMaterials: Material[] = [
   { id: 1, slug: "oro-18k", name: "Oro 18k" },
@@ -27,6 +23,18 @@ export const fallbackSlides: HeroSlide[] = [
     background_style: "black",
     image_fit: "contain",
   },
+  {
+    id: -2,
+    image_url: "/images/categories/collares-v1.webp",
+    title: "Un detalle tuyo.\nUn brillo único.",
+    subtitle: "Cadenas y dijes que acompañan tu historia. Encuentra una forma de llevar cerca lo que más quieres.",
+    cta_text: "Explorar collares",
+    cta_url: "/colecciones?category=collares",
+    image_alt: "Collar de oro con dije circular, imagen ilustrativa de campaña Killaq",
+    jewelry_tone: "gold",
+    background_style: "black",
+    image_fit: "cover",
+  },
 ];
 
 export function getPrimaryImage(product: Product) {
@@ -35,9 +43,11 @@ export function getPrimaryImage(product: Product) {
 
 type MaybeArray<T> = T | T[] | null | undefined;
 
-type ProductRow = Omit<Product, "categories" | "materials"> & {
+type ProductRow = Omit<Product, "categories" | "materials" | "subcategories" | "collections"> & {
   categories?: MaybeArray<Product["categories"]>;
   materials?: MaybeArray<Product["materials"]>;
+  subcategories?: MaybeArray<Product["subcategories"]>;
+  collections?: MaybeArray<Product["collections"]>;
 };
 
 function firstRelation<T>(value: MaybeArray<T>): T | null {
@@ -50,6 +60,8 @@ export function normalizeProduct(row: ProductRow): Product {
     ...row,
     categories: firstRelation(row.categories),
     materials: firstRelation(row.materials),
+    subcategories: firstRelation(row.subcategories),
+    collections: firstRelation(row.collections),
     product_images: row.product_images
       ? [...row.product_images].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
       : null,

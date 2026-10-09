@@ -3,6 +3,7 @@
 import Image from "@/components/StoreImage";
 import { useEffect, useState } from "react";
 import type { ProductImage, ProductVideo } from "@/types/catalog";
+import type { Subcategory, Collection } from "@/types/catalog";
 import { slugify } from "@/utils/format";
 import { supabase } from "@/utils/supabaseClient";
 import { getVideoPlatformLabel } from "@/utils/video";
@@ -16,6 +17,8 @@ interface Product {
   price: number;
   compare_price: number | null;
   category_id: number | null;
+  subcategory_id?: number | null;
+  collection_id?: number | null;
   material_id: number | null;
   stock: number;
   sku: string | null;
@@ -45,6 +48,8 @@ const emptyForm = {
   price: 0,
   compare_price: null as number | null,
   category_id: null as number | null,
+  subcategory_id: null as number | null,
+  collection_id: null as number | null,
   material_id: null as number | null,
   stock: 0,
   sku: "",
@@ -62,6 +67,8 @@ const emptyForm = {
 export default function ProductosAdmin() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -106,12 +113,16 @@ export default function ProductosAdmin() {
   };
 
   const fetchMeta = async () => {
-    const [catRes, matRes] = await Promise.all([
+    const [catRes, matRes, subRes, collectionRes] = await Promise.all([
       supabase.from("categories").select("id, name").order("sort_order"),
       supabase.from("materials").select("id, name").order("sort_order"),
+      supabase.from("subcategories").select("id, category_id, slug, name").eq("is_active",true).order("sort_order"),
+      supabase.from("collections").select("id, name, slug, is_active").order("sort_order"),
     ]);
     setCategories(catRes.data || []);
     setMaterials(matRes.data || []);
+    setSubcategories(subRes.data || []);
+    setCollections(collectionRes.data || []);
   };
 
   useEffect(() => {
@@ -148,6 +159,8 @@ export default function ProductosAdmin() {
       price: Number(product.price),
       compare_price: product.compare_price ? Number(product.compare_price) : null,
       category_id: product.category_id,
+      subcategory_id: product.subcategory_id || null,
+      collection_id: product.collection_id || null,
       material_id: product.material_id,
       stock: product.stock,
       sku: product.sku || "",
@@ -249,6 +262,8 @@ export default function ProductosAdmin() {
     setSaving(true);
     setError("");
 
+    if (form.subcategory_id && !subcategories.some(item => item.id === form.subcategory_id && item.category_id === form.category_id)) { setError("La subcategoría debe pertenecer a la categoría seleccionada."); setSaving(false); return; }
+
     const payload = {
       name: form.name.trim(),
       slug: form.slug.trim() || slugify(form.name),
@@ -256,6 +271,8 @@ export default function ProductosAdmin() {
       price: form.price,
       compare_price: form.compare_price || null,
       category_id: form.category_id,
+      subcategory_id: form.subcategory_id,
+      collection_id: form.collection_id,
       material_id: form.material_id,
       stock: form.stock,
       sku: form.sku.trim() || null,
@@ -428,12 +445,13 @@ export default function ProductosAdmin() {
 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Categoría</label>
+                <label className={styles.formLabel} htmlFor="product-category">Categoría</label>
                 <select
+                  id="product-category"
                   className={styles.formSelect}
                   value={form.category_id || ""}
                   onChange={(event) =>
-                    setForm({ ...form, category_id: event.target.value ? Number(event.target.value) : null })
+                    setForm({ ...form, category_id: event.target.value ? Number(event.target.value) : null, subcategory_id:null })
                   }
                 >
                   <option value="">Seleccionar</option>
@@ -459,6 +477,10 @@ export default function ProductosAdmin() {
               </div>
             </div>
 
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}><label className={styles.formLabel} htmlFor="product-subcategory">Subcategoría</label><select id="product-subcategory" className={styles.formSelect} disabled={!form.category_id} value={form.subcategory_id || ""} onChange={event => setForm({...form,subcategory_id:event.target.value ? Number(event.target.value) : null})}><option value="">Sin subcategoría</option>{subcategories.filter(item => item.category_id === form.category_id).map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select><small className={styles.helperText}>Solo se muestran los estilos de esta categoría.</small></div>
+              <div className={styles.formGroup}><label className={styles.formLabel} htmlFor="product-collection">Colección</label><select id="product-collection" className={styles.formSelect} value={form.collection_id || ""} onChange={event => setForm({...form,collection_id:event.target.value ? Number(event.target.value) : null})}><option value="">Sin colección</option>{collections.map(item => <option key={item.id} value={item.id}>{item.name}{item.is_active === false ? " (inactiva)" : ""}</option>)}</select><small className={styles.helperText}>Una pieza publicada con imagen y colección activa puede elegirse en «Pieza exclusiva».</small></div>
+            </div>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Precio (S/)</label>

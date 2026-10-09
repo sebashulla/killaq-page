@@ -57,6 +57,7 @@
 }
 
 .filterToggle { display: none; }
+.filterHint { color: var(--color-gray-light); font-size: .8rem; line-height: 1.8; }
 
 .filterSection {
   margin-bottom: var(--spacing-lg);

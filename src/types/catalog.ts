@@ -4,6 +4,21 @@ export interface Category {
   name: string;
   description?: string | null;
   image_url?: string | null;
+  is_active?: boolean;
+}
+
+export interface Subcategory {
+  id: number;
+  category_id: number;
+  slug: string;
+  name: string;
+}
+
+export interface Collection {
+  id: number;
+  name: string;
+  slug: string;
+  is_active?: boolean;
 }
 
 export interface Material {
@@ -51,6 +66,8 @@ export interface Product {
   price: number;
   compare_price: number | null;
   category_id?: number | null;
+  subcategory_id?: number | null;
+  collection_id?: number | null;
   material_id?: number | null;
   stock: number;
   sku?: string | null;
@@ -60,6 +77,8 @@ export interface Product {
   is_active?: boolean;
   created_at?: string;
   categories?: Pick<Category, "name" | "slug"> | null;
+  subcategories?: Pick<Subcategory, "name" | "slug"> | null;
+  collections?: Pick<Collection, "name" | "slug" | "is_active"> | null;
   materials?: Pick<Material, "name" | "slug"> | null;
   product_images?: ProductImage[] | null;
   product_videos?: ProductVideo[] | null;

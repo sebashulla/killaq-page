@@ -21,7 +21,9 @@ export default function ExperienceAdmin() {
     if (!Number.isFinite(form.hero_interval) || form.hero_interval < 6 || form.hero_interval > 20) { setError("El intervalo debe estar entre 6 y 20 segundos."); return; }
     setSaving(true);
     try {
-      const clean = normalizeStorefrontSettings(form);
+      const {data:previous,error:readError} = await supabase.from("site_settings").select("value").eq("key","storefront").maybeSingle();
+      if (readError) { setError("No se pudo cargar la configuración actual. Vuelve a intentarlo."); return; }
+      const clean = normalizeStorefrontSettings({...normalizeStorefrontSettings(previous?.value),welcome_enabled:form.welcome_enabled,artisan_enabled:form.artisan_enabled,hero_autoplay:form.hero_autoplay,hero_interval:form.hero_interval,personalized_title:form.personalized_title,personalized_description:form.personalized_description,whatsapp_number:form.whatsapp_number});
       const { data: { user } } = await supabase.auth.getUser();
       const { error: saveError } = await supabase.from("site_settings").upsert({ key: "storefront", value: clean, description: "Bienvenida, portada y atención personalizada de Killaq", updated_by: user?.id, updated_at: new Date().toISOString() }, { onConflict: "key" });
       if (saveError) { setError("No se pudo guardar. Verifica tu acceso de administrador y que hayas ejecutado 004_brand_and_storefront.sql."); return; }

@@ -11,7 +11,8 @@ import {
   getPrimaryImage,
   normalizeProducts,
 } from "@/data/catalog";
-import type { Category, Material, Product } from "@/types/catalog";
+import type { Category, Material, Product, Subcategory } from "@/types/catalog";
+import { categoryPresentation, presentCategories } from "@/data/taxonomy";
 import { supabase } from "@/utils/supabaseClient";
 import styles from "./page.module.css";
 
@@ -44,6 +45,8 @@ function getSearchableText(product: Product) {
       product.slug,
       product.categories?.name,
       product.categories?.slug,
+      product.subcategories?.name,
+      product.subcategories?.slug,
       product.materials?.name,
       product.materials?.slug,
     ]
@@ -56,6 +59,7 @@ export default function ColeccionesClient() {
   const searchParams = useSearchParams();
   const selectedAudience = searchParams.get("audience") || "";
   const selectedCategory = searchParams.get("category") || "";
+  const selectedSubcategory = searchParams.get("subcategory") || "";
   const search = searchParams.get("search") || "";
   const sortParam = searchParams.get("sort") || "relevance";
   const selectedSort: SortKey = ["price-asc", "price-desc", "newest"].includes(sortParam) ? sortParam as SortKey : "relevance";
@@ -63,6 +67,7 @@ export default function ColeccionesClient() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>(fallbackCategories);
   const [materials, setMaterials] = useState<Material[]>(fallbackMaterials);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
   const [sortOverride, setSortOverride] = useState<{ source: SortKey; value: SortKey } | null>(null);
   const sort = sortOverride?.source === selectedSort ? sortOverride.value : selectedSort;
@@ -72,23 +77,24 @@ export default function ColeccionesClient() {
   const filterHref = (key: string, value: string) => {
     const next = new URLSearchParams(searchParams.toString());
     if (value) next.set(key, value); else next.delete(key);
+    if (key === "category") next.delete("subcategory");
     return `/colecciones${next.size ? `?${next}` : ""}`;
   };
 
   useEffect(() => {
     const fetchCatalog = async () => {
       setLoadingProducts(true);
-      const [productsRes, categoriesRes, materialsRes] = await Promise.all([
+      const [productsRes, categoriesRes, subcategoriesRes, materialsRes] = await Promise.all([
         supabase
           .from("products")
-          .select("id, slug, name, description, price, compare_price, stock, sizes_available, created_at, is_featured, categories(name, slug), materials(name, slug), product_images(url, alt_text, sort_order)")
+          .select("id, slug, name, description, price, compare_price, stock, sizes_available, created_at, is_featured, categories(name, slug), subcategories(name, slug), materials(name, slug), product_images(url, alt_text, sort_order)")
           .eq("is_active", true)
           .order("created_at", { ascending: false }),
         supabase
           .from("categories")
-          .select("id, slug, name, description, image_url")
-          .eq("is_active", true)
+          .select("id, slug, name, description, image_url, is_active")
           .order("sort_order", { ascending: true }),
+        supabase.from("subcategories").select("id, category_id, slug, name").eq("is_active",true).order("sort_order"),
         supabase
           .from("materials")
           .select("id, slug, name, description")
@@ -98,8 +104,9 @@ export default function ColeccionesClient() {
 
       setProducts(normalizeProducts(productsRes.data));
       setCatalogError(Boolean(productsRes.error));
-      if (categoriesRes.data?.length) setCategories(categoriesRes.data as Category[]);
+      if (categoriesRes.data?.length) setCategories(presentCategories(categoriesRes.data as Category[]));
       if (materialsRes.data?.length) setMaterials(materialsRes.data as Material[]);
+      setSubcategories(subcategoriesRes.data || []);
       setLoadingProducts(false);
     };
 
@@ -114,12 +121,13 @@ export default function ColeccionesClient() {
 
     const baseFiltered = products.filter((product) => {
       const categoryMatch = !selectedCategory || product.categories?.slug === selectedCategory;
+      const subcategoryMatch = !selectedSubcategory || product.subcategories?.slug === selectedSubcategory;
       const materialMatch =
         selectedMaterials.length === 0 ||
         Boolean(product.materials?.slug && selectedMaterials.includes(product.materials.slug));
       const searchMatch = !query || getSearchableText(product).includes(query);
 
-      return categoryMatch && materialMatch && searchMatch;
+      return categoryMatch && subcategoryMatch && materialMatch && searchMatch;
     });
 
     const terms = audienceTerms[selectedAudience] || [];
@@ -134,7 +142,7 @@ export default function ColeccionesClient() {
       if (sort === "newest") return (b.created_at || "").localeCompare(a.created_at || "");
       return Number(Boolean(b.is_featured)) - Number(Boolean(a.is_featured));
     });
-  }, [products, search, selectedAudience, selectedCategory, selectedMaterials, sort]);
+  }, [products, search, selectedAudience, selectedCategory, selectedSubcategory, selectedMaterials, sort]);
 
   const toggleMaterial = (slug: string) => {
     setSelectedMaterials((current) =>
@@ -142,7 +150,11 @@ export default function ColeccionesClient() {
     );
   };
 
-  const pageTitle = selectedAudience
+  const category = categories.find(item => item.slug === selectedCategory);
+  const databaseStyles = subcategories.filter(item => item.category_id === category?.id);
+  const availableStyles = databaseStyles.length ? databaseStyles : categoryPresentation(selectedCategory)?.subcategories || [];
+  const style = availableStyles.find(item => item.slug === selectedSubcategory);
+  const pageTitle = category ? `${category.name}${style ? ` · ${style.name}` : ""}` : selectedAudience
     ? `Colección ${audienceLabels[selectedAudience] || "Killaq"}`
     : "Colección Killaq";
 
@@ -206,6 +218,10 @@ export default function ColeccionesClient() {
             </div>
           </div>
 
+          <div className={styles.filterSection}>
+            <h3 className={styles.filterTitle}>{category ? `Estilos de ${category.name}` : "Subcategorías"}</h3>
+            {category ? <div className={styles.filterList}><Link href={filterHref("subcategory", "")} className={!selectedSubcategory ? styles.filterPillActive : styles.filterPill}>Todos los estilos</Link>{availableStyles.map(item => <Link key={item.slug} href={filterHref("subcategory",item.slug)} className={selectedSubcategory === item.slug ? styles.filterPillActive : styles.filterPill} aria-current={selectedSubcategory === item.slug ? "page" : undefined}>{item.name}</Link>)}</div> : <p className={styles.filterHint}>Elige una categoría para explorar sus estilos.</p>}
+          </div>
           <div className={styles.filterSection}>
             <h3 className={styles.filterTitle}>Material</h3>
             <div className={styles.filterList}>

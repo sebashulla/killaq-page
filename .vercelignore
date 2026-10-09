@@ -4,4 +4,6 @@
 .next/
 node_modules/
 screenshots/
+design-assets/
 .git/
+.vercel/

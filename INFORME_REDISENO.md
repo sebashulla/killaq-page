@@ -1,66 +1,51 @@
-# Killaq · Informe de rediseño
+# Killaq · Informe de la actualización
 
-8 de octubre de 2026 · Identidad dorada y atención personalizada
+9 de octubre de 2026 · Campañas, categorías y pieza exclusiva
 
-La tienda ahora presenta una identidad de blanco cálido, dorado y negro. Se conserva la composición editorial que te gustó, con más contraste para las joyas y una atención personalizada que tiene su propia página. El proyecto sigue disponible en http://localhost:3000 con actualización al guardar cambios.
+La tienda conserva la composición y la identidad de blanco cálido, dorado y negro. Esta actualización suma una segunda campaña, imágenes de referencia para las cinco categorías y un apartado administrable para un modelo exclusivo de colección.
 
 ## Cómo quedó
 
 | Área | Resultado |
 | --- | --- |
-| Identidad | Marca dorada, textos en negro, superficies blancas y acentos de oro. Fondos oscuros reservados para composiciones de joyas y pie de página. |
-| Portada | El anillo dorado queda sobre negro y permanece fijo por defecto. No alterna automáticamente con la segunda campaña de ejemplo. |
-| Campañas | Fondo automático: oro sobre negro y plata sobre dorado. También se puede elegir negro, dorado o blanco y mostrar la pieza completa o una foto que cubra el área. |
-| Bienvenida | Logo dorado, transición al anillo sobre negro y apertura a la tienda clara. Se puede omitir, repetir o desactivar desde administración. |
-| Categorías | Ilustraciones de joyería con combinaciones de negro, blanco y dorado. Las fotografías cargadas en la base tienen prioridad. |
-| Atención personalizada | Nueva página «Hecho para ti» accesible desde el menú, inicio y pie de página. Incluye explicación de la atención, preguntas frecuentes y preparación de una consulta. |
-| Proceso artesanal | Secuencia ilustrada de boceto, forma del metal, engaste y acabado; termina con el anillo de campaña. Permite elegir etapas, pausar y repetir. |
-| Consulta | El visitante elige pieza y material y escribe una idea opcional. El botón prepara esos datos en WhatsApp para revisarlos antes de enviar. No crea un pedido ni envía un mensaje automáticamente. |
+| Portada | Se mantiene el anillo dorado sobre negro. La segunda campaña presenta un collar sobre negro, dentro del mismo arco. |
+| Animación | Fundido de 1,25 segundos y acercamiento suave; transición breve en los textos. Rotación cada 9 segundos, configurable, con flechas y pausa. Se detiene al interactuar y respeta movimiento reducido. |
+| Categorías | Fotografías de referencia generadas para Anillos, Collares, Aretes, Pulseras y Charms. Oro sobre negro y aretes plateados sobre dorado. Las fotos propias del catálogo tienen prioridad. |
+| Subcategorías | Estilos separados bajo cada categoría, en el menú y en los filtros. Anillos: compromiso, matrimonio, moda y sellos. Collares: cadenas, dijes y gargantillas. Aretes: argollas, broqueles y largos. Pulseras: brazaletes, cadenas y amuletos. Charms: símbolos, iniciales y piedras. |
+| Modelo exclusivo | Bloque especial de portada con foto, colección, nombre y precio reales. Se puede mostrar u ocultar desde el panel. |
+| Móvil | Dos categorías por fila, menú desplazable, filtros plegables y controles de carrusel y estilos con mayor área táctil. |
+| Identidad existente | Se conservan la bienvenida del logo y anillo, la página de atención personalizada y la animación del proceso artesanal. |
 
-La animación artesanal es una interpretación gráfica, no una filmación del taller ni una garantía de que todos los productos siguen el mismo proceso. El anillo generado sigue identificado como imagen de campaña. El catálogo utiliza productos y existencias reales de Supabase.
+Las cinco imágenes son referencias de campaña, identificadas como tales; no representan productos ni existencias reales. Los PNG originales, los WebP de 1200 px y los prompts de `imagegen` están documentados en `design-assets/IMAGENES_REFERENCIA.md`. Los cinco WebP suman aproximadamente 280 KB.
 
-## Panel propio
+## Cómo administrar el exclusivo
 
-Acceso con una cuenta cuyo perfil tiene el rol `admin`. La comprobación de acceso del panel se complementa con políticas SQL que restringen las escrituras.
+1. Entrar con una cuenta cuyo perfil tenga rol `admin`.
+2. En **Pieza exclusiva** (`/admin/exclusivos`), crear una colección si todavía no existe.
+3. En **Productos** (`/admin/productos`), publicar la pieza, cargar su imagen y asignarle categoría, subcategoría y colección.
+4. Volver a **Pieza exclusiva**, seleccionar el modelo, editar el título y la descripción, marcar «Mostrar pieza exclusiva» y guardar.
+5. Desmarcar la opción para ocultar el apartado. Si la pieza se despublica, pierde su imagen o pertenece a una colección inactiva, el bloque también permanece oculto.
 
-- **Portada y campañas** (`/admin/carrusel`): mensajes, enlaces, URL de imagen, descripción accesible, color de la joya, fondo, encuadre, orden y estado. Incluye vista previa de fondo y encuadre. Los títulos admiten saltos de línea.
-- **Experiencia de marca** (`/admin/experiencia`): bienvenida, animación artesanal, rotación automática e intervalo; título, descripción y WhatsApp de la página personalizada.
-- **Productos y videos**: se conserva la administración existente, incluida la gestión de tallas y medios.
+El apartado empieza oculto. Una colección creada por sí sola no publica contenido. El panel valida que el estilo corresponda a la categoría seleccionada, y el SQL incorpora la misma validación. Los ajustes de Experiencia de marca y Pieza exclusiva conservan los campos del otro apartado al guardar.
 
-Para que el fondo negro o dorado se vea detrás de una joya, usar una imagen PNG transparente. Una foto que ya trae fondo conserva sus píxeles. Las imágenes de campaña se gestionan por URL; la carga directa de archivos de campaña puede añadirse como siguiente mejora.
+Las campañas se editan en `/admin/carrusel`; la rotación e intervalo, en `/admin/experiencia`. Las campañas activas propias reemplazan el contenido de respaldo, y una campaña desactivada permanece desactivada.
 
-Si no hay campañas activas propias, la tienda muestra la composición de Killaq como respaldo. La primera campaña activa por orden determina la entrada. Las campañas de administración ya no se colocan obligatoriamente después de una pieza fija en código.
+## SQL manual
 
-## SQL que debes aplicar
+**Nuevo archivo: `src/sql/005_categories_and_exclusive_showcase.sql`.** Copiarlo completo al SQL Editor de Supabase después del 004. Si aún no se aplicaron los anteriores, seguir **001 → 002 → 003 → 004 → 005**. No se ejecutó SQL en Supabase remoto.
 
-Nuevo archivo: **`src/sql/004_brand_and_storefront.sql`**. Copiar completo al SQL Editor de Supabase después de los archivos anteriores. No ejecuté ninguna migración en tu base remota.
+El 005 agrega Charms y sus estilos, completa imágenes vacías sin sobrescribir fotos propias, añade la segunda campaña de Killaq y configura el exclusivo oculto. Activa la rotación en su primera aplicación; si se repite, conserva la elección posterior del administrador. No crea productos de ejemplo y no reactiva campañas deshabilitadas.
 
-El 004 agrega opciones de material, fondo y encuadre a `hero_slides`, y una configuración pública de marca con escritura exclusiva de administradores. Convierte únicamente la primera campaña de ejemplo intacta y desactiva la segunda campaña de ejemplo intacta, conservándola para editar. No cambia campañas propias ni sobrescribe ajustes al volver a ejecutarse.
+## Verificación
 
-La última consulta de Supabase todavía detecta pendientes las tablas de videos (`001`) y reclamaciones (`003`), y las nuevas columnas de marca (`004`). Orden documentado: **001 → 002 → 003 → 004**. No volver a ejecutar el esquema inicial completo.
+- Lint y compilación de producción sin errores; 19 rutas generadas.
+- Once pruebas de carrito, configuración, categorías y condiciones de visibilidad del exclusivo.
+- Cinco migraciones ejecutadas dos veces en PostgreSQL local con PGlite. Comprobación de roles, conservación de ajustes, campaña única, imágenes propias y rechazo de subcategorías de otra categoría.
+- Prueba del admin en una aplicación aislada con datos locales: creación de colección, selección de producto, mostrar/ocultar el bloque y reinicio del estilo al cambiar de categoría. Los filtros Símbolos e Iniciales mostraron resultados distintos según la pieza de prueba.
+- Revisión visual local de portada y catálogo a 320, 390 y 1440 px, sin desbordamiento horizontal; carga de las imágenes y navegación a los filtros. La herramienta de navegador no estuvo disponible para repetir la revisión visual después del último ajuste de áreas táctiles; la publicación se comprueba también por HTTP.
 
-## Verificación y límites
+El catálogo remoto consultado sigue sin productos públicos. Las pruebas administrativas locales no sustituyen la comprobación con una cuenta admin real después de aplicar las migraciones. No se enviaron mensajes ni pagos reales. La compra continúa coordinándose por WhatsApp.
 
-- Compilación de producción y lint sin errores.
-- Nueve pruebas de carrito y configuración de marca aprobadas.
-- Las cuatro migraciones se ejecutaron dos veces en PostgreSQL local. Se probaron permisos de visitante, cliente y administrador, los fondos admitidos y la conservación de cambios del dueño al repetir 004.
-- Revisión visual a 320, 390 y 1440 px, sin desbordamiento horizontal; navegación a la nueva página, selección de etapa artesanal y preparación del enlace de consulta. Se comprobó la repetición de bienvenida y el retorno del foco. Sin mensajes ni pagos reales.
-- El acceso sin sesión a `/admin/experiencia` redirige al inicio de sesión.
-- El catálogo público remoto sigue sin productos. Hay cuatro categorías y cinco materiales. Hace falta cargar las piezas comerciales, precios, tallas y fotografías antes de presentar la tienda como lista para vender.
-- Las nuevas escrituras administrativas no se probaron en Supabase remoto: el 004 sigue pendiente y no se inició sesión con una cuenta administradora. La lógica del frontend compiló y los permisos se verificaron con la base local.
-- El cobro y la entrega siguen coordinándose por WhatsApp; no hay pasarela de tarjetas, reserva automática de stock ni pedido automático desde este botón.
-- Confirmar los canales comerciales definitivos: el nuevo panel permite editar el WhatsApp de atención personalizada, mientras los contactos generales y el carrito mantienen su configuración existente.
+## Próximas mejoras útiles
 
-Capturas: `screenshots/killaq-preview-v3.jpg`, `screenshots/killaq-personalizada-v3.jpg` y `screenshots/killaq-personalizada-mobile-v3.jpg`.
-
-## Qué agregaría después
-
-1. **Catálogo y fotografías reales.** Piezas sobre negro si son doradas y sobre dorado si son plateadas, con fotos del detalle, escala y vista puesta. Es la prioridad para dar confianza y convertir visitas en consultas.
-2. **Historia real del taller.** Un video breve del artesano, sus herramientas y el acabado. Puede complementar o sustituir la interpretación animada con evidencia propia de la marca.
-3. **Guía de tallas y cuidados.** Medidas orientativas, ayuda para elegir y cuidados por material en cada ficha. Reduce dudas antes del pedido.
-4. **Gestión de consultas y pedidos.** Bandeja administrativa con estado, responsable y seguimiento, en lugar de depender únicamente de las conversaciones de WhatsApp.
-5. **Carga directa de campañas.** Subida de imágenes, recorte y vista previa móvil desde el panel, con almacenamiento y permisos de administrador.
-6. **Favoritos y regalos.** Lista de deseos, opciones de presentación y dedicatoria según el servicio real que ofrezca Killaq.
-7. **Pago integrado.** Elegir un proveedor y completar pagos, confirmación de pedidos, stock y envíos como un flujo consistente antes de habilitar cobro en línea.
-
-La siguiente entrega más valiosa sería cargar un catálogo pequeño y completo con fotos reales y mostrarlo a los dueños junto con esta identidad dorada.
+La prioridad es cargar un catálogo pequeño con fotografías reales, precios, tallas y stock. Después conviene incorporar una guía de tallas y cuidados, fotos de las piezas puestas, y material auténtico del taller. Una bandeja de consultas y pedidos facilitaría el seguimiento; la integración de pagos requiere completar conjuntamente pedidos, stock y envíos.

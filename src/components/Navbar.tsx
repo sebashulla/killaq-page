@@ -6,13 +6,8 @@ import { ChevronDown, Menu, Search, ShoppingBag, UserRound, X, ArrowUpRight } fr
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import Brand from "./Brand";
+import { categoryDirectory } from "@/data/taxonomy";
 import styles from "./Navbar.module.css";
-const categories = [
-  { name: "Anillos", slug: "anillos", detail: "Promesas y nuevos comienzos" },
-  { name: "Collares", slug: "collares", detail: "Detalles cerca del corazón" },
-  { name: "Aretes", slug: "aretes", detail: "Un brillo que te acompaña" },
-  { name: "Pulseras", slug: "pulseras", detail: "Pequeños gestos, grandes historias" },
-];
 export default function Navbar() {
   const [menu, setMenu] = useState(false);
   const [shop, setShop] = useState(false);
@@ -61,7 +56,7 @@ export default function Navbar() {
     </div>
     {shop && <div className={styles.shopMenu} id="shop-menu">
       <div className={styles.shopHeading}><span>Encuentra tu próxima joya</span><Link href="/colecciones" onClick={close}>Ver todo <ArrowUpRight size={15} /></Link></div>
-      <div className={styles.categories}>{categories.map((item, index) => <Link key={item.slug} href={`/colecciones?category=${item.slug}`} onClick={close}><small>0{index + 1}</small><strong>{item.name}</strong><span>{item.detail}</span><ArrowUpRight size={18} /></Link>)}</div>
+      <div className={styles.categories}>{categoryDirectory.map((item, index) => <div key={item.slug} className={styles.categoryGroup}><Link className={styles.categoryMain} href={`/colecciones?category=${item.slug}`} onClick={close}><small>0{index + 1}</small><strong>{item.name}</strong><span>{item.detail}</span><ArrowUpRight size={18} /></Link><div className={styles.subcategories}>{item.subcategories.map(sub => <Link key={sub.slug} href={`/colecciones?category=${item.slug}&subcategory=${sub.slug}`} onClick={close}>{sub.name}</Link>)}</div></div>)}</div>
       {sessionUser && <button className={styles.signOut} type="button" onClick={async () => { await signOut(); close(); router.push("/"); }}>Cerrar sesión</button>}
     </div>}
     {search && <form id="site-search" className={styles.search} onSubmit={submit}><Search size={19} /><input ref={searchRef} type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Encuentra un anillo, un collar, una historia…" aria-label="Buscar joyas" /><button type="submit">Buscar <ArrowUpRight size={16} /></button></form>}

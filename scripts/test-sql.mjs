@@ -18,6 +18,10 @@ await db.exec(`
   CREATE TABLE public.profiles(id UUID PRIMARY KEY, role TEXT DEFAULT 'customer', full_name TEXT);
   CREATE FUNCTION public.is_admin() RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER AS $$ SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin') $$;
   CREATE TABLE public.products(id UUID PRIMARY KEY, is_active BOOLEAN DEFAULT true, stock INT DEFAULT 1);
+  CREATE TABLE public.categories(id SERIAL PRIMARY KEY, slug TEXT UNIQUE NOT NULL, name TEXT, image_url TEXT, sort_order INT DEFAULT 0, is_active BOOLEAN DEFAULT true);
+  CREATE TABLE public.subcategories(id SERIAL PRIMARY KEY, category_id INT REFERENCES public.categories(id), slug TEXT UNIQUE NOT NULL, name TEXT, sort_order INT DEFAULT 0, is_active BOOLEAN DEFAULT true);
+  CREATE TABLE public.collections(id SERIAL PRIMARY KEY, slug TEXT UNIQUE NOT NULL, name TEXT, is_active BOOLEAN DEFAULT true);
+  ALTER TABLE public.products ADD COLUMN category_id INT REFERENCES public.categories(id), ADD COLUMN subcategory_id INT REFERENCES public.subcategories(id), ADD COLUMN collection_id INT REFERENCES public.collections(id);
   CREATE TABLE public.product_images(id SERIAL PRIMARY KEY, product_id UUID REFERENCES public.products(id), url TEXT);
   CREATE TABLE public.hero_slides(id SERIAL PRIMARY KEY, title TEXT NOT NULL, subtitle TEXT, cta_text TEXT, cta_url TEXT, image_url TEXT NOT NULL, image_alt TEXT, sort_order INT DEFAULT 0, is_active BOOLEAN DEFAULT true);
   ALTER TABLE public.hero_slides ENABLE ROW LEVEL SECURITY;
@@ -45,7 +49,8 @@ await db.exec(`
   GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
   INSERT INTO auth.users VALUES ('${admin}'), ('${customer}'), ('${other}');
   INSERT INTO public.profiles VALUES ('${admin}','admin','Owner'), ('${customer}','customer','Customer');
-  INSERT INTO public.products VALUES ('${published}', true, 3), ('${hidden}', false, 0);
+  INSERT INTO public.products(id,is_active,stock) VALUES ('${published}', true, 3), ('${hidden}', false, 0);
+  INSERT INTO public.categories(slug,name,image_url) VALUES ('anillos','Anillos','owner-image.webp');
   INSERT INTO public.product_images(product_id,url) VALUES ('${published}','active.jpg'), ('${hidden}','hidden.jpg');
   INSERT INTO public.hero_slides(title,subtitle,cta_text,cta_url,image_url) VALUES
     ('Colección Matrimonio','Sella tu promesa con el brillo de nuestros diamantes exclusivos.','VER CATÁLOGO','/colecciones/matrimonio','/images/hero-bg.png'),
@@ -53,9 +58,16 @@ await db.exec(`
     ('Owner campaign','Own copy','Discover','/colecciones','https://example.com/custom.png'),
     ('Colección Matrimonio','Owner edited this message','VER CATÁLOGO','/colecciones/matrimonio','/images/hero-bg.png');
 `);
-const migrations = await Promise.all(['001_restore_media.sql', '002_harden_store_permissions.sql', '003_restore_complaints_book.sql', '004_brand_and_storefront.sql'].map(name => readFile(new URL(`../src/sql/${name}`, import.meta.url), 'utf8')));
+const migrations = await Promise.all(['001_restore_media.sql', '002_harden_store_permissions.sql', '003_restore_complaints_book.sql', '004_brand_and_storefront.sql','005_categories_and_exclusive_showcase.sql'].map(name => readFile(new URL(`../src/sql/${name}`, import.meta.url), 'utf8')));
 for (let pass = 0; pass < 2; pass++) for (const sql of migrations) await db.exec(sql);
-console.log('PASS: all four SQL migrations execute twice without error');
+console.log('PASS: all five SQL migrations execute twice without error');
+assert.equal((await db.query("SELECT COUNT(*) AS count FROM public.categories WHERE slug='charms'")).rows[0].count,1);
+assert.equal((await db.query("SELECT COUNT(*) AS count FROM public.subcategories WHERE slug LIKE 'charms-%'")).rows[0].count,3);
+assert.equal((await db.query("SELECT image_url FROM public.categories WHERE slug='anillos'")).rows[0].image_url,'owner-image.webp');
+assert.equal((await db.query("SELECT COUNT(*) AS count FROM public.hero_slides WHERE image_url='/images/categories/collares-v1.webp'")).rows[0].count,1);
+await assert.rejects(db.query("UPDATE public.products SET category_id=(SELECT id FROM public.categories WHERE slug='anillos'), subcategory_id=(SELECT id FROM public.subcategories WHERE slug='charms-simbolos') WHERE id=$1",[published]),/subcategoría debe pertenecer/);
+await db.query("UPDATE public.products SET category_id=(SELECT id FROM public.categories WHERE slug='charms'), subcategory_id=(SELECT id FROM public.subcategories WHERE slug='charms-simbolos') WHERE id=$1",[published]);
+console.log('PASS: Charms and new campaign are unique, custom images survive and categories cannot be mixed');
 assert.equal((await db.query("SELECT image_url FROM public.hero_slides WHERE title = 'Owner campaign'")).rows[0].image_url, 'https://example.com/custom.png');
 assert.equal((await db.query("SELECT is_active FROM public.hero_slides WHERE title = 'Nueva Colección Eternidad'")).rows[0].is_active, false);
 assert.equal((await db.query("SELECT background_style FROM public.hero_slides WHERE image_url = '/images/killaq-ring-v2.png'")).rows[0].background_style, 'black');
@@ -68,7 +80,8 @@ async function session(role, user = '') {
   await db.exec(`SET ROLE ${role}`);
 }
 await session('anon');
-assert.equal((await db.query("SELECT value FROM public.site_settings WHERE key = 'storefront'")).rows[0].value.hero_autoplay, false);
+assert.equal((await db.query("SELECT value FROM public.site_settings WHERE key = 'storefront'")).rows[0].value.hero_autoplay, true);
+assert.equal((await db.query("SELECT value FROM public.site_settings WHERE key = 'storefront'")).rows[0].value.exclusive_enabled,false);
 await assert.rejects(db.query("INSERT INTO public.site_settings(key) VALUES ('malicious')"), /permission denied|row-level security/);
 assert.equal((await db.query('SELECT * FROM public.product_videos')).rows.length, 1);
 assert.equal((await db.query('SELECT * FROM public.social_videos')).rows.length, 1);
@@ -109,4 +122,12 @@ await db.exec(migrations[3]);
 assert.equal((await db.query("SELECT value FROM public.site_settings WHERE key = 'storefront'")).rows[0].value.hero_autoplay, true);
 assert.equal((await db.query("SELECT jewelry_tone FROM public.hero_slides WHERE title = 'Owner campaign'")).rows[0].jewelry_tone, 'silver');
 console.log('PASS: brand settings are public to read, admin-only to write, validate backgrounds and preserve owner changes on rerun');
+await db.query("UPDATE public.site_settings SET value=jsonb_set(jsonb_set(value,'{exclusive_enabled}','true'),'{hero_autoplay}','false') WHERE key='storefront'");
+await db.query("UPDATE public.hero_slides SET is_active=false WHERE image_url='/images/categories/collares-v1.webp'");
+await db.exec(migrations[4]);
+const finalSettings=(await db.query("SELECT value FROM public.site_settings WHERE key='storefront'")).rows[0].value;
+assert.equal(finalSettings.exclusive_enabled,true);
+assert.equal(finalSettings.hero_autoplay,false);
+assert.equal((await db.query("SELECT is_active FROM public.hero_slides WHERE image_url='/images/categories/collares-v1.webp'")).rows[0].is_active,false);
+console.log('PASS: rerunning 005 preserves admin visibility and motion choices');
 await db.close();

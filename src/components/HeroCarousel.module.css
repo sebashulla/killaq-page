@@ -1,5 +1,6 @@
 .hero { max-width: 1440px; margin: auto; padding: 50px 4% 45px; display: grid; grid-template-columns: 1fr 1fr; gap: 6%; min-height: 660px; }
 .copy { display: flex; flex-direction: column; justify-content: center; padding: 24px 0; }
+.copyFrame { min-height: 350px; }
 .eyebrow { font-size: .63rem; font-weight: 500; letter-spacing: .18em; display: flex; align-items: center; gap: 12px; margin-bottom: 30px; color: var(--color-gold); }
 .eyebrow > span { width: 24px; height: 1px; background: var(--color-gold); }
 .copy h1 { font-size: clamp(3.4rem, 6.5vw, 6.1rem); line-height: .98; letter-spacing: -.045em; white-space: pre-line; max-width: 620px; }
@@ -12,9 +13,12 @@
 .pagination { display: flex; align-items: center; gap: 13px; font-size: .7rem; }
 .pagination small { color: var(--color-gray-light); font-size: .6rem; }
 .paginationLine { width: 65px; height: 1px; background: var(--color-border); }
-.pagination button { display: grid; place-items: center; border: 0; background: transparent; color: var(--color-black); cursor: pointer; width: 28px; height: 32px; }
+.pagination button { display: grid; place-items: center; border: 0; background: transparent; color: var(--color-black); cursor: pointer; width: 44px; height: 44px; transition: color .2s; }
+.pagination button:hover { color: var(--color-gold); }
+.pagination { flex-wrap: wrap; gap: 8px; }
 .replay { border: 0; background: none; color: var(--color-gray-light); display: inline-flex; align-items: center; gap: 8px; font-size: .61rem; cursor: pointer; padding: 10px 0; }
 .visual { min-height: 555px; position: relative; background: var(--color-ink); overflow: hidden; border-radius: 46% 46% 2px 2px; isolation: isolate; }
+.visualLayer { position: absolute; inset: 0; isolation: isolate; }
 .black { background: radial-gradient(ellipse at 60% 40%, #292824, #111111 58%, #080808); }
 .gold { background: radial-gradient(ellipse at 60% 40%, #e1c984, #bd954c 58%, #9a742f); }
 .white { background: #f5f0e7; }
@@ -39,6 +43,7 @@
 @media (max-width: 700px) {
   .hero { padding: 34px 6% 32px; grid-template-columns: 1fr; gap: 28px; }
   .copy { padding: 0; }
+  .copyFrame { min-height: 300px; }
   .eyebrow { margin-bottom: 20px; font-size: .58rem; }
   .copy h1 { font-size: clamp(3.6rem, 12vw, 5rem); }
   .description { font-size: .8rem; max-width: 330px; margin-top: 20px; }
@@ -46,3 +51,4 @@
   .bottom { margin-top: 25px; }
   .visual { min-height: 410px; }
 }
+@media (max-width: 380px) { .paginationLine { width: 25px; } .pagination { gap: 4px; } .copyFrame { min-height: 360px; } }

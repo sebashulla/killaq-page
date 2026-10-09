@@ -1,0 +1,28 @@
+# Imágenes de referencia de Killaq
+
+Generadas con la herramienta integrada `imagegen`. Son imágenes de campaña ilustrativas; no se usan como productos, stock ni modelos exclusivos reales.
+
+Originales: `design-assets/categories/{anillos,collares,aretes,pulseras,charms}-v1.png`.
+Versiones web: `public/images/categories/{anillos,collares,aretes,pulseras,charms}-v1.webp`, 1200 px, WebP calidad 88.
+
+## Prompts finales
+
+### anillos
+
+Use case: product-mockup. Asset type: square category reference image for Killaq fine jewelry website. Primary request: One fine yellow-gold solitaire ring with a modest brilliant clear gemstone, angled three-quarter view, the entire circular band visible. Scene/backdrop: Deep matte black with barely perceptible warm reflections. Style: high-end studio jewelry photography, realistic metal and gemstone details, restrained elegance. Composition: square, centered, jewelry occupies about 65 percent of image, generous empty margins to accommodate website crop and small corner controls, no scene props. Lighting: soft large studio highlights with believable fine reflections; sharp jewelry details and clean silhouette. Palette: gold, black, ivory or champagne only as specified. Constraints: one coherent composition, no typography, no logos, no labels, no watermarks, no hands, no people, no packaging. This is an illustrative campaign reference, not a photograph of actual merchandise.
+
+### collares
+
+Use case: product-mockup. Asset type: square category reference image for Killaq fine jewelry website. Primary request: One fine yellow-gold chain necklace, elegantly arranged as a slender U with a small polished circular open pendant and one tiny clear gem at the bottom. Entire necklace centered, both ends fade naturally at upper edge. Scene/backdrop: Deep matte black with barely perceptible warm reflections. Style: high-end studio jewelry photography, realistic metal and gemstone details, restrained elegance. Composition: square, centered, jewelry occupies about 65 percent of image, generous empty margins to accommodate website crop and small corner controls, no scene props. Lighting: soft large studio highlights with believable fine reflections; sharp jewelry details and clean silhouette. Palette: gold, black, ivory or champagne only as specified. Constraints: one coherent composition, no typography, no logos, no labels, no watermarks, no hands, no people, no packaging. This is an illustrative campaign reference, not a photograph of actual merchandise.
+
+### aretes
+
+Use case: product-mockup. Asset type: square category reference image for Killaq fine jewelry website. Primary request: A matching pair of fine polished silver drop earrings with small pear-shaped clear gemstones, both earrings entirely visible and symmetrically arranged. Scene/backdrop: Warm matte champagne-gold, softly illuminated, no glitter. Style: high-end studio jewelry photography, realistic metal and gemstone details, restrained elegance. Composition: square, centered, jewelry occupies about 65 percent of image, generous empty margins to accommodate website crop and small corner controls, no scene props. Lighting: soft large studio highlights with believable fine reflections; sharp jewelry details and clean silhouette. Palette: gold, black, ivory or champagne only as specified. Constraints: one coherent composition, no typography, no logos, no labels, no watermarks, no hands, no people, no packaging. This is an illustrative campaign reference, not a photograph of actual merchandise.
+
+### pulseras
+
+Use case: product-mockup. Asset type: square category reference image for Killaq fine jewelry website. Primary request: One fine yellow-gold chain bracelet with a small smooth oval medallion and a realistic clasp, laid in an elegant oval, the entire bracelet visible. Scene/backdrop: Deep matte black with barely perceptible warm reflections. Style: high-end studio jewelry photography, realistic metal and gemstone details, restrained elegance. Composition: square, centered, jewelry occupies about 65 percent of image, generous empty margins to accommodate website crop and small corner controls, no scene props. Lighting: soft large studio highlights with believable fine reflections; sharp jewelry details and clean silhouette. Palette: gold, black, ivory or champagne only as specified. Constraints: one coherent composition, no typography, no logos, no labels, no watermarks, no hands, no people, no packaging. This is an illustrative campaign reference, not a photograph of actual merchandise.
+
+### charms
+
+Use case: product-mockup. Asset type: square category reference image for Killaq fine jewelry website. Primary request: Three separate delicate yellow-gold charms: a crescent moon, a small five-point star and a tiny polished heart. Each has a small realistic attachment loop, arranged with generous spacing in a refined triangular grouping, all entirely visible. Scene/backdrop: Deep matte black with barely perceptible warm reflections. Style: high-end studio jewelry photography, realistic metal and gemstone details, restrained elegance. Composition: square, centered, jewelry occupies about 65 percent of image, generous empty margins to accommodate website crop and small corner controls, no scene props. Lighting: soft large studio highlights with believable fine reflections; sharp jewelry details and clean silhouette. Palette: gold, black, ivory or champagne only as specified. Constraints: one coherent composition, no typography, no logos, no labels, no watermarks, no hands, no people, no packaging. This is an illustrative campaign reference, not a photograph of actual merchandise.

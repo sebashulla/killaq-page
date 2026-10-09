@@ -1,9 +1,10 @@
 "use client";
 import Image from "next/image";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useId, useState } from "react";
 import { Play, Pause, RotateCcw } from "lucide-react";
 import { useStorefrontSettings } from "@/context/StorefrontContext";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import styles from "./ArtisanAnimation.module.css";
 
 const stages = [
@@ -15,7 +16,7 @@ const stages = [
 
 export default function ArtisanAnimation() {
   const { settings, loaded } = useStorefrontSettings();
-  const reduce = useReducedMotion();
+  const reduce = useMotionPreference();
   const [stage, setStage] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [run, setRun] = useState(0);
@@ -45,7 +46,7 @@ export default function ArtisanAnimation() {
           {current === 0 && <motion.g initial={{ x: -55, y: 70, opacity: 0 }} animate={{ x: [0, 35, 65], y: [0, 50, 100], opacity: [0, 1, 0] }} transition={{ duration: 2 }}><path d="m143 153 38-90 9 4-38 90-9-4Z" fill="#d7b96e" /><path d="m143 153-3 15 12-11" stroke="#f9f5ea" /></motion.g>}
           {current === 1 && <motion.g style={{ transformOrigin: "320px 260px" }} animate={{ rotate: [-10, 6, -10, 6, -10] }} transition={{ duration: 1.7 }}><path d="m324 215-19 79" stroke="#ac8952" strokeWidth="9" strokeLinecap="round" /><rect x="300" y="200" width="49" height="16" rx="2" fill="#e3d7bf" transform="rotate(14 324 208)" /></motion.g>}
           {current === 2 && <motion.g initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.7, delay: .4 }} stroke="#f9e1a3" strokeWidth="1.2"><path d="M280 90v22m-11-11h22M161 147v14m-7-7h14" /></motion.g>}
-        </motion.svg> : <motion.div key="finished" className={styles.finished} initial={animated ? { opacity: 0, scale: .88 } : false} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .9 }}><Image src="/images/killaq-ring-v2.png" alt="Anillo de oro ilustrativo al finalizar la secuencia artesanal" fill sizes="(max-width: 700px) 90vw, 45vw" loading="eager" /><motion.span className={styles.glint} initial={{ opacity: 0 }} animate={animated ? { opacity: [0, 1, 0], scale: [.8, 1.1, .8] } : { opacity: .6 }} transition={{ duration: 1.4, delay: .5 }}>✧</motion.span></motion.div>}
+        </motion.svg> : <motion.div key="finished" className={styles.finished} initial={animated ? { opacity: 0, scale: .88 } : false} animate={{ opacity: 1, scale: 1 }} transition={{ duration: animated ? .9 : 0 }}><Image src="/images/killaq-ring-v2.png" alt="Anillo de oro ilustrativo al finalizar la secuencia artesanal" fill sizes="(max-width: 700px) 90vw, 45vw" loading="eager" /><motion.span className={styles.glint} initial={animated ? { opacity: 0 } : false} animate={animated ? { opacity: [0, 1, 0], scale: [.8, 1.1, .8] } : { opacity: .6 }} transition={{ duration: animated ? 1.4 : 0, delay: animated ? .5 : 0 }}>✧</motion.span></motion.div>}
       </AnimatePresence>
       <div className={styles.caption}><span>0{current + 1} / {stages[current].name.toUpperCase()}</span><p>{stages[current].text}</p></div>
     </div>

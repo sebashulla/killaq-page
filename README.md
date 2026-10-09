@@ -35,6 +35,8 @@ En `/admin/carrusel` se administran campañas, fondos y encuadres con vista prev
 
 Informe de esta iteración: `INFORME_REDISENO.md`.
 
+La revisión de móviles y tablets del 9 de octubre está documentada en `RESPONSIVE_AUDIT.md`, con comparaciones antes/después en `screenshots/responsive/`. Conserva la composición de escritorio, adapta la pasarela, categorías, filtros y footer, y corrige el movimiento reducido de la animación artesanal. Los scripts `audit:responsive`, `test:responsive`, `compare:responsive` y `audit:stability` permiten repetir la verificación con Playwright. Esta iteración no modifica SQL.
+
 ## Categorías y pieza exclusiva
 
 Anillos, Collares, Aretes, Pulseras y Charms tienen imágenes de referencia generadas y enlaces separados a sus estilos. Las imágenes propias de Supabase tienen prioridad. Originales, versiones WebP y prompts: `design-assets/IMAGENES_REFERENCIA.md`. Las referencias no crean productos ni existencias.

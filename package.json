@@ -11,7 +11,11 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test scripts/test-cart.mjs scripts/test-storefront.mjs && node scripts/test-sql.mjs",
-    "check:supabase": "node scripts/check-supabase.mjs"
+    "check:supabase": "node scripts/check-supabase.mjs",
+    "audit:responsive": "node scripts/audit-responsive.mjs",
+    "test:responsive": "node scripts/test-responsive-ui.mjs",
+    "compare:responsive": "node scripts/compare-responsive.mjs",
+    "audit:stability": "node scripts/audit-layout-stability.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
@@ -23,7 +27,9 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@electric-sql/pglite": "^0.5.8",
+    "@playwright/test": "^1.64.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

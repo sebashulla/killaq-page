@@ -41,6 +41,8 @@
 
 .tableWrap {
   overflow-x: auto;
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
 }
 
 .table th {
@@ -290,7 +292,7 @@
 }
 
 .inlineHint {
-  color: var(--color-gold);
+  color: var(--color-gold-text);
   font-size: 0.8rem;
 }
 
@@ -386,4 +388,19 @@
   .formRow {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 1100px) {
+  .addButton, .editBtn, .deleteBtn, .saveBtn, .cancelBtn { min-height: 44px; }
+  .formInput, .formSelect { min-height: 48px; }
+  .actionGroup { flex-wrap: wrap; }
+  .table th, .table td { padding: 12px; }
+  .table .rowTitle { min-width: 130px; }
+  .priceCell { white-space: nowrap; }
+  .campaignPreview span { right: 20px; line-height: 1.5; }
+}
+@media (max-width: 560px) {
+  .modal { padding: 24px 20px; max-height: 88dvh; }
+  .formSection { padding: 16px; }
+  .modalActions > * { display: inline-flex; align-items: center; justify-content: center; }
 }

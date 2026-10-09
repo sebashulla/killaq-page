@@ -107,7 +107,7 @@ export default function SocialVideosAdmin() {
       {videos.length === 0 ? (
         <div className={styles.emptyState}>Aún no hay videos sociales publicados.</div>
       ) : (
-        <div className={styles.tableWrap}>
+        <div className={styles.tableWrap} role="region" aria-label="Listado de videos" tabIndex={0}>
           <table className={styles.table}>
             <thead>
               <tr>

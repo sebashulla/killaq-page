@@ -331,7 +331,7 @@ export default function ProductosAdmin() {
       {products.length === 0 ? (
         <div className={styles.emptyState}>No hay productos. Añade el primero desde el botón superior.</div>
       ) : (
-        <div className={styles.tableWrap}>
+        <div className={styles.tableWrap} role="region" aria-label="Listado de productos" tabIndex={0}>
           <table className={styles.table}>
             <thead>
               <tr>

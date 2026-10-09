@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { SlidersHorizontal, ChevronDown } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
+import CatalogFilters from "./CatalogFilters";
 import ProductCard from "@/components/ProductCard";
 import {
   fallbackCategories,
@@ -74,12 +75,23 @@ export default function ColeccionesClient() {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [catalogError, setCatalogError] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const filterDialog = useRef<HTMLDialogElement>(null);
   const filterHref = (key: string, value: string) => {
     const next = new URLSearchParams(searchParams.toString());
     if (value) next.set(key, value); else next.delete(key);
     if (key === "category") next.delete("subcategory");
     return `/colecciones${next.size ? `?${next}` : ""}`;
   };
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const desktop = window.matchMedia("(min-width: 901px)");
+    const closeOnDesktop = () => { if (desktop.matches) filterDialog.current?.close(); };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => { document.body.style.overflow = previous; desktop.removeEventListener("change", closeOnDesktop); };
+  }, [filtersOpen]);
 
   useEffect(() => {
     const fetchCatalog = async () => {
@@ -158,6 +170,18 @@ export default function ColeccionesClient() {
     ? `Colección ${audienceLabels[selectedAudience] || "Killaq"}`
     : "Colección Killaq";
 
+  const filterProps = { categories, materials, audienceLabels, selectedAudience, selectedCategory, selectedSubcategory, selectedMaterials, category, availableStyles, filterHref, toggleMaterial };
+  const applied: { key: string; label: string; href?: string; material?: string }[] = [
+    ...(selectedAudience ? [{ key: "audience", label: `Tienda: ${audienceLabels[selectedAudience] || selectedAudience}`, href: filterHref("audience", "") }] : []),
+    ...(selectedCategory ? [{ key: "category", label: `Categoría: ${category?.name || selectedCategory}`, href: filterHref("category", "") }] : []),
+    ...(selectedSubcategory ? [{ key: "subcategory", label: `Estilo: ${style?.name || selectedSubcategory}`, href: filterHref("subcategory", "") }] : []),
+    ...(search ? [{ key: "search", label: `Búsqueda: ${search}`, href: filterHref("search", "") }] : []),
+    ...selectedMaterials.map(slug => ({ key: `material-${slug}`, label: `Material: ${materials.find(item => item.slug === slug)?.name || slug}`, material: slug })),
+  ];
+  const cleared = new URLSearchParams(searchParams.toString());
+  for (const key of ["audience", "category", "subcategory", "search"]) cleared.delete(key);
+  const clearHref = `/colecciones${cleared.size ? `?${cleared}` : ""}`;
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -170,74 +194,7 @@ export default function ColeccionesClient() {
 
       <main className={styles.mainContent}>
         <aside className={styles.sidebar}>
-          <button type="button" className={styles.filterToggle} aria-expanded={filtersOpen} aria-controls="catalog-filters" onClick={() => setFiltersOpen(!filtersOpen)}><SlidersHorizontal size={17} /> Filtros y materiales <ChevronDown size={17} /></button>
-          <div id="catalog-filters" className={`${styles.filterGroups} ${filtersOpen ? styles.filterGroupsOpen : ""}`}>
-          <div className={styles.filterSection}>
-            <h3 className={styles.filterTitle}>Tienda</h3>
-            <div className={styles.filterList}>
-              <Link
-                href={filterHref("audience", "")}
-                className={!selectedAudience ? styles.filterPillActive : styles.filterPill}
-              >
-                Toda la tienda
-              </Link>
-              {Object.entries(audienceLabels).map(([slug, label]) => (
-                <Link
-                  key={slug}
-                  href={filterHref("audience", slug)}
-                  className={
-                    selectedAudience === slug ? styles.filterPillActive : styles.filterPill
-                  }
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.filterSection}>
-            <h3 className={styles.filterTitle}>Categorías</h3>
-            <div className={styles.filterList}>
-              <Link
-                href={filterHref("category", "")}
-                className={!selectedCategory ? styles.filterPillActive : styles.filterPill}
-              >
-                Todas
-              </Link>
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={filterHref("category", category.slug)}
-                  className={
-                    selectedCategory === category.slug ? styles.filterPillActive : styles.filterPill
-                  }
-                >
-                  {category.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.filterSection}>
-            <h3 className={styles.filterTitle}>{category ? `Estilos de ${category.name}` : "Subcategorías"}</h3>
-            {category ? <div className={styles.filterList}><Link href={filterHref("subcategory", "")} className={!selectedSubcategory ? styles.filterPillActive : styles.filterPill}>Todos los estilos</Link>{availableStyles.map(item => <Link key={item.slug} href={filterHref("subcategory",item.slug)} className={selectedSubcategory === item.slug ? styles.filterPillActive : styles.filterPill} aria-current={selectedSubcategory === item.slug ? "page" : undefined}>{item.name}</Link>)}</div> : <p className={styles.filterHint}>Elige una categoría para explorar sus estilos.</p>}
-          </div>
-          <div className={styles.filterSection}>
-            <h3 className={styles.filterTitle}>Material</h3>
-            <div className={styles.filterList}>
-              {materials.map((material) => (
-                <label key={material.id} className={styles.checkboxRow}>
-                  <input
-                    type="checkbox"
-                    checked={selectedMaterials.includes(material.slug)}
-                    onChange={() => toggleMaterial(material.slug)}
-                  />
-                  {material.name}
-                </label>
-              ))}
-            </div>
-          </div>
-          </div>
+          <div id="catalog-filters" className={styles.filterGroups}><CatalogFilters {...filterProps} /></div>
         </aside>
 
         <section className={styles.productGridWrapper}>
@@ -245,6 +202,7 @@ export default function ColeccionesClient() {
             <span className={styles.resultsCount}>
               {filteredProducts.length} {filteredProducts.length === 1 ? "resultado" : "resultados"}
             </span>
+            <button type="button" className={styles.filterToggle} aria-expanded={filtersOpen} aria-controls="catalog-filter-dialog" aria-haspopup="dialog" onClick={() => { filterDialog.current?.showModal(); setFiltersOpen(true); }}><SlidersHorizontal size={17} /> Filtros{applied.length ? ` (${applied.length})` : ""}</button>
             <select
               className={styles.sortSelect}
               aria-label="Ordenar joyas"
@@ -257,6 +215,11 @@ export default function ColeccionesClient() {
               <option value="newest">Recién llegados</option>
             </select>
           </div>
+
+          {applied.length > 0 && <div className={styles.appliedFilters} aria-label="Filtros aplicados">
+            {applied.map(item => item.href ? <Link key={item.key} href={item.href} aria-label={`Quitar ${item.label}`} title={item.label}><span>{item.label}</span><X size={14} aria-hidden="true" /></Link> : <button key={item.key} type="button" onClick={() => toggleMaterial(item.material!)} aria-label={`Quitar ${item.label}`} title={item.label}><span>{item.label}</span><X size={14} aria-hidden="true" /></button>)}
+            <Link href={clearHref} onClick={() => setSelectedMaterials([])} className={styles.clearFilters}>Limpiar filtros</Link>
+          </div>}
 
           {loadingProducts ? (
             <div className={styles.emptyState}>Cargando productos publicados...</div>
@@ -287,6 +250,11 @@ export default function ColeccionesClient() {
           )}
         </section>
       </main>
+      <dialog ref={filterDialog} id="catalog-filter-dialog" aria-labelledby="catalog-filter-title" className={styles.filterDialog} onClose={() => setFiltersOpen(false)} onClick={event => { if (event.target !== event.currentTarget) return; const bounds = event.currentTarget.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) event.currentTarget.close(); }}>
+        <div className={styles.dialogHeader}><h2 id="catalog-filter-title">Filtrar joyas</h2><button type="button" onClick={() => filterDialog.current?.close()} aria-label="Cerrar filtros"><X size={20} /></button></div>
+        <div className={styles.dialogBody}><CatalogFilters {...filterProps} /></div>
+        <div className={styles.dialogFooter}><button type="button" onClick={() => filterDialog.current?.close()}>Ver {filteredProducts.length} {filteredProducts.length === 1 ? "resultado" : "resultados"}</button></div>
+      </dialog>
     </div>
   );
 }

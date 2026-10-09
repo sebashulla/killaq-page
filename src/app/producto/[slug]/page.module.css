@@ -65,7 +65,7 @@
 .backLink,
 .meta,
 .sectionHeader span {
-  color: var(--color-gold);
+  color: var(--color-gold-text);
   text-transform: uppercase;
   letter-spacing: 1.2px;
   font-size: 0.78rem;
@@ -235,4 +235,22 @@
   .videoGrid {
     grid-template-columns: 1fr;
   }
+}
+@media (max-width: 1100px) {
+  .page { padding-top: 36px; padding-bottom: 40px; }
+  .detail { gap: 28px; }
+  .sizeButton, .sizeActive { min-height: 44px; }
+  .backLink { min-height: 44px; display: inline-flex; align-items: center; }
+  .priceRow { flex-wrap: wrap; }
+}
+@media (min-width: 701px) and (max-width: 1000px) { .detail { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .info h1 { font-size: 2.65rem; } }
+@media (max-width: 640px) {
+  .page { padding-left: 6%; padding-right: 6%; }
+  .mainImage .image { object-fit: contain; }
+  .info h1 { font-size: 2.3rem; overflow-wrap: anywhere; }
+  .facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .facts div { min-width: 0; padding: 12px 8px; overflow-wrap: anywhere; }
+  .relatedGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 14px; }
+  .thumb { min-height: 44px; }
+  .primaryButton { font-size: .9rem; }
 }

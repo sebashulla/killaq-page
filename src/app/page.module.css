@@ -5,7 +5,7 @@
 .promisePlace { font-size: .52rem; letter-spacing: .12em; }
 .section, .selection { max-width: 1440px; margin: auto; padding: 82px 4%; }
 .sectionHeader { display: flex; justify-content: space-between; align-items: flex-end; gap: 25px; margin-bottom: 34px; }
-.kicker { display: block; font-size: .57rem; letter-spacing: .18em; color: var(--color-gold); margin-bottom: 12px; }
+.kicker { display: block; font-size: .57rem; letter-spacing: .18em; color: var(--color-gold-text); margin-bottom: 12px; }
 .sectionHeader h2 { font-size: clamp(2.2rem, 3.5vw, 3.3rem); line-height: 1.1; letter-spacing: -.025em; }
 .textLink { display: inline-flex; align-items: center; gap: 18px; font-size: .67rem; border-bottom: 1px solid var(--color-border); padding: 8px 0; flex-shrink: 0; }
 .textLink:hover { border-color: var(--color-gold); }
@@ -27,6 +27,7 @@
 .subcategoryLinks a { display: inline-flex; align-items: center; color: var(--color-gray-light); font-size: .72rem; padding: 7px 0; min-height: 36px; }
 .subcategoryLinks a:hover { color: var(--color-gold-deep); text-decoration: underline; text-underline-offset: 4px; }
 .referenceNote { margin-top: 20px; color: var(--color-gray-light); font-size: .55rem; letter-spacing: .03em; }
+.styleToggle { display: none; }
 @media (min-width: 701px) and (max-width: 1000px) { .categoryGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 700px) { .subcategoryLinks { gap: 0 14px; } .subcategoryLinks a { min-height: 44px; font-size: .75rem; } }
 @media (prefers-reduced-motion: reduce) { .categoryImage { transition: none; } .skeletonGrid > div { animation: none; } }
@@ -63,3 +64,62 @@
 .contactText { color: var(--color-gray-light); font-size: .8rem; line-height: 1.8; margin: -10px auto 28px; }
 @media (max-width: 900px) { .promisePlace { display: none !important; } .catalogInvitation { flex-wrap: wrap; gap: 25px; } .catalogInvitation > a { margin-left: 80px; } .benefits { grid-template-columns: 1fr 1fr; gap: 30px; } .benefits article:nth-child(2) { border: 0; } .categoryGrid { gap: 14px; } .productGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 700px) { .story { grid-template-columns: 1fr; } .storyImage { min-height: 390px; } .storyCopy { padding: 45px 8%; } .categoryGrid { grid-template-columns: 1fr 1fr; row-gap: 28px; } .section, .selection { padding: 50px 6%; } .selection { padding-top: 0; } .sectionHeader { gap: 16px; flex-wrap: wrap; } .sectionHeader h2 { font-size: 2.35rem; } .promiseBar { padding: 20px 6%; gap: 16px; flex-wrap: wrap; justify-content: center; font-size: .56rem; } .promiseBar > span { gap: 7px; } .promiseBar > span:nth-child(3) { display: none; } .categoryCard h3 { font-size: 1.5rem; margin-top: 12px; } .categoryCard p { font-size: .58rem; } .catalogInvitation { padding: 26px; flex-direction: column; align-items: flex-start; } .catalogInvitation h3 { font-size: 1.7rem; } .catalogInvitation > a { margin: 0; } .benefits { padding: 45px 6%; gap: 25px; } .benefits article { padding-right: 15px; } .benefits h3 { font-size: 1.3rem; } .benefits p { font-size: .65rem; } .videoGrid { grid-template-columns: 1fr; } .skeletonGrid { grid-template-columns: 1fr 1fr; } .skeletonGrid > div { height: 240px; } .contactBand { padding: 55px 6%; } }
+
+@media (max-width: 1100px) {
+  .textLink { min-height: 44px; font-size: .8rem; }
+  .categoryCard p { font-size: .75rem; }
+  .kicker { font-size: .65rem; line-height: 1.6; }
+  .referenceNote { font-size: .7rem; line-height: 1.7; }
+  .benefits p { font-size: .85rem; line-height: 1.75; }
+  .contactText { font-size: .9rem; }
+  .contactButton { min-height: 48px; font-size: .8rem; gap: 16px; max-width: 100%; }
+}
+@media (min-width: 701px) and (max-width: 1100px) {
+  .categoryGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px 22px; }
+  .section, .selection { padding-top: 56px; padding-bottom: 56px; }
+  .selection { padding-top: 0; }
+  .storyCopy { padding: 36px 6%; }
+  .storyCopy p { font-size: .9rem; line-height: 1.8; }
+  .storyImage { min-height: 460px; }
+}
+@media (max-width: 700px) {
+  .section, .selection { padding: 40px 6%; }
+  .selection { padding-top: 12px; }
+  .sectionHeader { margin-bottom: 24px; gap: 10px; }
+  .sectionHeader h2 { font-size: clamp(1.95rem, 8.4vw, 2.4rem); }
+  .promiseBar { padding: 16px 6%; font-size: .7rem; gap: 10px 20px; }
+  .categoryGrid { row-gap: 24px; }
+  .categoryNumber { top: 12px; left: 12px; font-size: .65rem; }
+  .categoryCard h3 { font-size: 1.6rem; }
+  .categoryStyles { margin-top: 10px; }
+  .styleToggle { display: flex; width: 100%; min-height: 44px; align-items: center; justify-content: space-between; gap: 8px; border: 0; border-top: 1px solid var(--color-border); background: none; color: var(--color-black); font-size: .8rem; cursor: pointer; }
+  .styleToggle svg { transition: transform .2s; }
+  .styleToggle[aria-expanded=true] svg { transform: rotate(180deg); }
+  .subcategoryLinks { display: none; margin: 0; padding: 0; border: 0; }
+  .stylesOpen { display: flex; }
+  .charmsCard { grid-column: 1 / -1; }
+  .charmsCard > a { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 20px; }
+  .charmsCard .categoryVisual { grid-row: 1 / 3; }
+  .charmsCard h3 { align-self: end; margin: 0; }
+  .charmsCard p { margin: 0; }
+  .charmsCard .categoryStyles { margin-left: calc(50% + 10px); margin-top: 0; }
+  .catalogInvitation { display: grid; grid-template-columns: 32px minmax(0, 1fr); padding: 24px; gap: 16px; }
+  .invitationMark { width: 32px; height: 32px; align-self: start; }
+  .catalogInvitation > div { display: contents; }
+  .catalogInvitation h3 { font-size: 1.65rem; }
+  .catalogInvitation p { grid-column: 1 / -1; font-size: .85rem; line-height: 1.75; margin: 0; }
+  .catalogInvitation > a { grid-column: 1 / -1; justify-self: start; }
+  .storyImage { min-height: 0; aspect-ratio: 1.25; }
+  .storyImage > span { left: 6%; right: 6%; bottom: 20px; line-height: 1.6; font-size: .6rem; }
+  .storyCopy { padding: 30px 6%; }
+  .storyMark { width: 30px; height: 30px; margin-bottom: 16px; }
+  .storyCopy h2 { font-size: clamp(2rem, 8.5vw, 2.6rem); margin-bottom: 20px; }
+  .storyCopy p { font-size: .9rem; line-height: 1.8; margin-bottom: 14px; }
+  .storyCopy .textLink { margin-top: 4px; }
+  .benefits { padding: 36px 6%; gap: 24px 18px; }
+  .benefits article { padding-right: 8px; min-width: 0; }
+  .benefits h3 { font-size: 1.35rem; }
+  .benefits svg { margin-bottom: 12px; }
+  .contactBand { padding: 40px 6%; }
+  .contactBand h2 { font-size: 2rem; margin-bottom: 22px; }
+}

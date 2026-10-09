@@ -14,3 +14,5 @@
 .cartButton:disabled { opacity: .55; }
 .feedback { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 @media (max-width: 600px) { .content h3 { font-size: 1.25rem; } .cartButton { font-size: .58rem; } }
+@media (max-width: 1100px) { .meta { font-size: .7rem; } .cartButton { font-size: .8rem; } .priceRow { font-size: .9rem; } }
+@media (max-width: 600px) { .content { padding-top: 12px; gap: 7px; } .content h3 { font-size: 1.3rem; overflow-wrap: anywhere; } .cartButton { gap: 6px; font-size: .75rem; text-align: left; } }

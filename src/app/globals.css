@@ -6,6 +6,7 @@
   --color-gray-light: #66635e;
   --color-gray-medium: #706b62;
   --color-gold: #94702d;
+  --color-gold-text: #876629;
   --color-gold-soft: #d7b96e;
   --color-gold-pale: #f1e8d5;
   --color-gold-deep: #6f5428;
@@ -38,6 +39,10 @@ svg { flex-shrink: 0; }
 :focus-visible { outline: 2px solid var(--color-gold); outline-offset: 5px; }
 .skip-link { position: fixed; top: 8px; left: 16px; z-index: 3000; padding: 12px 20px; background: var(--color-ink); color: white; transform: translateY(-160%); }
 .skip-link:focus { transform: translateY(0); }
+body input:focus-visible, body select:focus-visible, body textarea:focus-visible { outline: 2px solid var(--color-gold-deep); outline-offset: 3px; }
+@media (max-width: 1100px) {
+  input:not([type=checkbox]):not([type=radio]), select, textarea { font-size: max(16px, 1em); }
+}
 @media (max-width: 600px) { :root { --spacing-lg: 1.25rem; --spacing-xl: 3rem; } }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

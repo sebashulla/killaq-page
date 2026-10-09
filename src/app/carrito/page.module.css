@@ -17,7 +17,7 @@
 }
 
 .header span {
-  color: var(--color-gold);
+  color: var(--color-gold-text);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   font-size: 0.78rem;
@@ -211,4 +211,21 @@
     grid-column: 2;
     justify-self: start;
   }
+}
+@media (max-width: 1100px) {
+  .page { min-height: 65svh; padding-top: 36px; padding-bottom: 40px; }
+  .header { margin-bottom: 28px; }
+  .cartLayout { gap: 28px; }
+  .quantity { grid-template-columns: 44px 36px 44px; }
+  .quantity button, .removeButton, .secondaryButton { min-height: 44px; }
+  .itemInfo { min-width: 0; overflow-wrap: anywhere; }
+}
+@media (max-width: 680px) {
+  .page { padding-left: 6%; padding-right: 6%; }
+  .header h1 { font-size: 2.4rem; }
+  .empty { min-height: clamp(240px, 35svh, 360px); padding: 24px; }
+  .item { grid-template-columns: 72px minmax(0, 1fr); gap: 14px; padding: 16px; }
+  .imageBox { width: 72px; }
+  .summary { padding: 24px; }
+  .primaryButton { font-size: .85rem; }
 }

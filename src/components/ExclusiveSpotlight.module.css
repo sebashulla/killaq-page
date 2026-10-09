@@ -15,3 +15,5 @@
 .cta { display: inline-flex; gap: 25px; align-items: center; padding: 15px 22px; background: var(--color-ink); color: #fff; font-size: .7rem; }
 @media(max-width:700px) { .section { padding: 0 6% 45px; } .spotlight { grid-template-columns: 1fr; } .visual { min-height: 310px; } .copy { padding: 30px 25px; } }
 @media(prefers-reduced-motion:reduce) { .visual img { transition:none; } }
+@media(max-width:1100px) { .copy p { font-size: .9rem; } .kicker { font-size: .7rem; line-height: 1.7; } .cta { min-height: 48px; font-size: .85rem; } }
+@media(max-width:700px) { .section { padding-bottom: 40px; } .visual { min-height: 0; aspect-ratio: 1.05; } .visual img { padding: 24px; } .copy { padding: 28px 22px; } .copy h2 { font-size: clamp(2rem, 8.5vw, 2.7rem); } .product { margin-top: 22px; padding: 18px 0; } .product h3 { font-size: 1.4rem; overflow-wrap: anywhere; } }

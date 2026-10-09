@@ -20,7 +20,7 @@
 
 .kicker {
   display: block;
-  color: var(--color-gold);
+  color: var(--color-gold-text);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   font-size: 0.78rem;
@@ -191,3 +191,50 @@
     flex-direction: column;
   }
 }
+
+.filterDialog { margin: auto 0 0 auto; width: min(100%, 460px); max-width: 100%; height: min(86dvh, 800px); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid var(--color-border); background: var(--background); color: var(--color-black); overflow: auto; overscroll-behavior: contain; }
+.filterDialog::backdrop { background: #15151580; }
+.dialogHeader { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; background: var(--background); border-bottom: 1px solid var(--color-border); }
+.dialogHeader h2 { font-size: 1.7rem; }
+.dialogHeader button { display: grid; place-items: center; width: 44px; height: 44px; border: 0; background: none; color: var(--color-black); cursor: pointer; }
+.dialogBody { padding: 24px 20px 12px; }
+.dialogFooter { position: sticky; bottom: 0; padding: 16px 20px; background: var(--background); border-top: 1px solid var(--color-border); }
+.dialogFooter button { display: block; width: 100%; min-height: 48px; padding: 12px; border: 0; background: var(--color-ink); color: white; font-size: .9rem; cursor: pointer; }
+.filterDialog .filterList { flex-direction: row; flex-wrap: wrap; }
+.filterDialog .filterPill, .filterDialog .filterPillActive, .filterDialog .checkboxRow { min-height: 44px; font-size: .9rem; }
+.appliedFilters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: -8px 0 24px; }
+.appliedFilters a, .appliedFilters button { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 10px 12px; border: 1px solid var(--color-border); background: none; font-size: .8rem; color: var(--color-black); cursor: pointer; max-width: 100%; }
+.appliedFilters span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.appliedFilters .clearFilters { border-color: transparent; color: var(--color-gold-deep); text-decoration: underline; }
+@media (max-width: 1100px) {
+  .header { padding-top: 38px; padding-bottom: 36px; }
+  .mainContent { padding-top: 32px; padding-bottom: 40px; gap: 32px; }
+  .container { min-height: 65svh; }
+}
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .mainContent { display: block; }
+  .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 12px; margin-bottom: 22px; align-items: center; }
+  .resultsCount { grid-column: 1 / -1; font-size: .85rem; }
+  .filterToggle { display: inline-flex; min-height: 48px; width: 100%; justify-content: center; padding: 10px; font-size: .9rem; }
+  .sortSelect { min-width: 0; width: 100%; min-height: 48px; padding: 0 10px; font-size: 1rem; }
+  .appliedFilters { flex-wrap: nowrap; overflow-x: auto; padding: 8px; scroll-padding-inline: 8px; scrollbar-width: thin; }
+  .appliedFilters a, .appliedFilters button { flex-shrink: 0; max-width: 250px; }
+  .productGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 18px; }
+  .emptyState { padding: 30px 24px; }
+  .emptyState a { display: inline-flex; align-items: center; min-height: 44px; font-size: .9rem; }
+}
+@media (max-width: 560px) {
+  .header { padding: 28px 6%; text-align: left; }
+  .title { font-size: clamp(2.1rem, 9vw, 2.65rem); line-height: 1.1; }
+  .subtitle { font-size: .9rem; line-height: 1.75; }
+  .mainContent { padding: 24px 6% 36px; }
+  .emptyState { padding: 28px 20px; }
+  .emptyState h2 { font-size: 1.8rem; line-height: 1.2; }
+  .emptyState p { font-size: .9rem; }
+  .productGrid { gap: 24px 14px; }
+}
+@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .filterDialog[open] { animation: filterEntry .2s ease-out; }
+}
+@keyframes filterEntry { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }

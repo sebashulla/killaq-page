@@ -136,7 +136,7 @@ export default function CarruselAdmin() {
       {slides.length === 0 ? (
         <div className={styles.emptyState}>No hay slides configurados. Añade el primero.</div>
       ) : (
-        <div className={styles.tableWrap}>
+        <div className={styles.tableWrap} role="region" aria-label="Listado de campañas" tabIndex={0}>
           <table className={styles.table}>
             <thead>
               <tr>

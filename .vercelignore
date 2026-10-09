@@ -7,3 +7,6 @@ screenshots/
 design-assets/
 .git/
 .vercel/
+artifacts/
+test-results/
+playwright-report/

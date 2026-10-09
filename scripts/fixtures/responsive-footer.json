@@ -1,0 +1,58 @@
+[
+  {
+    "label": "Todas las joyas",
+    "href": "/colecciones"
+  },
+  {
+    "label": "Anillos",
+    "href": "/colecciones?category=anillos"
+  },
+  {
+    "label": "Collares",
+    "href": "/colecciones?category=collares"
+  },
+  {
+    "label": "Aretes",
+    "href": "/colecciones?category=aretes"
+  },
+  {
+    "label": "Pulseras",
+    "href": "/colecciones?category=pulseras"
+  },
+  {
+    "label": "Charms",
+    "href": "/colecciones?category=charms"
+  },
+  {
+    "label": "El universo Killaq",
+    "href": "/nosotros"
+  },
+  {
+    "label": "Atención personalizada",
+    "href": "/atencion-personalizada"
+  },
+  {
+    "label": "Mi cuenta",
+    "href": "/perfil"
+  },
+  {
+    "label": "Mi carrito",
+    "href": "/carrito"
+  },
+  {
+    "label": "Libro de reclamaciones",
+    "href": "/libro-reclamaciones"
+  },
+  {
+    "label": "Asesoría por WhatsApp ",
+    "href": "https://wa.me/51912964356"
+  },
+  {
+    "label": "+51 912 964 356",
+    "href": "tel:+51912964356"
+  },
+  {
+    "label": "contacto@killaq.pe",
+    "href": "mailto:contacto@killaq.pe"
+  }
+]

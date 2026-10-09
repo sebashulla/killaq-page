@@ -14,6 +14,10 @@ export default function Navbar() {
   const [search, setSearch] = useState(false);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
+  const menuToggleRef = useRef<HTMLButtonElement>(null);
+  const shopToggleRef = useRef<HTMLButtonElement>(null);
+  const searchToggleRef = useRef<HTMLButtonElement>(null);
+  const shopBackRef = useRef<HTMLButtonElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -21,13 +25,19 @@ export default function Navbar() {
   const { sessionUser, signOut } = useAuth();
   const close = () => { setMenu(false); setShop(false); setSearch(false); };
   useEffect(() => {
-    const dismiss = (event: KeyboardEvent) => { if (event.key === "Escape") { setMenu(false); setShop(false); setSearch(false); } };
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || (!menu && !shop && !search)) return;
+      const trigger = search ? searchToggleRef.current : menu ? menuToggleRef.current : shopToggleRef.current;
+      setMenu(false); setShop(false); setSearch(false);
+      trigger?.focus();
+    };
     const outside = (event: PointerEvent) => { if (!navRef.current?.contains(event.target as Node)) { setMenu(false); setShop(false); setSearch(false); } };
     window.addEventListener("keydown", dismiss);
     window.addEventListener("pointerdown", outside);
     return () => { window.removeEventListener("keydown", dismiss); window.removeEventListener("pointerdown", outside); };
-  }, []);
+  }, [menu, shop, search]);
   useEffect(() => { if (search) searchRef.current?.focus(); }, [search]);
+  useEffect(() => { if (shop && window.matchMedia("(max-width: 1100px)").matches) shopBackRef.current?.focus(); }, [shop]);
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     if (!query.trim()) return;
@@ -37,10 +47,10 @@ export default function Navbar() {
   return <nav className={styles.navbar} ref={navRef} aria-label="Navegación principal">
     <div className={styles.announcement}><span>Joyas para los momentos que importan</span><Link href="/atencion-personalizada" onClick={close}>Atención personalizada <ArrowUpRight size={12} /></Link></div>
     <div className={styles.topBar}>
-      <button type="button" className={styles.mobileToggle} aria-label={menu ? "Cerrar menú" : "Abrir menú"} aria-expanded={menu} aria-controls="main-navigation" onClick={() => { setMenu(!menu); setShop(false); setSearch(false); }}>{menu ? <X /> : <Menu />}</button>
+      <button ref={menuToggleRef} type="button" className={styles.mobileToggle} aria-label={menu ? "Cerrar menú" : "Abrir menú"} aria-expanded={menu} aria-controls="main-navigation" onClick={() => { setMenu(!menu); setShop(false); setSearch(false); }}>{menu ? <X /> : <Menu />}</button>
       <Link href="/" className={styles.logo} aria-label="Killaq, inicio" onClick={close}><Brand /></Link>
       <div id="main-navigation" className={`${styles.links} ${menu ? styles.open : ""}`}>
-        <button type="button" className={styles.link} aria-expanded={shop} aria-controls="shop-menu" onClick={() => setShop(!shop)}>Tienda <ChevronDown size={12} /></button>
+        <button ref={shopToggleRef} type="button" className={styles.link} aria-expanded={shop} aria-controls="shop-menu" onClick={() => { setShop(!shop); setSearch(false); }}>Tienda <ChevronDown size={12} /></button>
         <Link href="/colecciones" className={styles.link} aria-current={pathname === "/colecciones" ? "page" : undefined} onClick={close}>Colecciones</Link>
         <Link href="/ofertas" className={styles.link} aria-current={pathname === "/ofertas" ? "page" : undefined} onClick={close}>Ofertas</Link>
         <Link href="/atencion-personalizada" className={styles.link} aria-current={pathname === "/atencion-personalizada" ? "page" : undefined} onClick={close}>Hecho para ti</Link>
@@ -49,13 +59,13 @@ export default function Navbar() {
         {sessionUser?.profile?.role === "admin" && <Link href="/admin" className={styles.link} onClick={close}>Administrar</Link>}
       </div>
       <div className={styles.actions}>
-        <button type="button" className={styles.icon} aria-label={search ? "Cerrar búsqueda" : "Buscar"} aria-expanded={search} aria-controls="site-search" onClick={() => { setSearch(!search); setMenu(false); setShop(false); }}>{search ? <X /> : <Search />}</button>
+        <button ref={searchToggleRef} type="button" className={styles.icon} aria-label={search ? "Cerrar búsqueda" : "Buscar"} aria-expanded={search} aria-controls="site-search" onClick={() => { setSearch(!search); setMenu(false); setShop(false); }}>{search ? <X /> : <Search />}</button>
         <Link className={`${styles.icon} ${styles.account}`} href={sessionUser ? "/perfil" : "/login"} aria-label={sessionUser ? "Mi cuenta" : "Ingresar"}><UserRound /></Link>
         <Link className={styles.icon} href="/carrito" aria-label={`Abrir carrito, ${totalItems} piezas`} onClick={close}><ShoppingBag />{totalItems > 0 && <span className={styles.count}>{totalItems}</span>}</Link>
       </div>
     </div>
     {shop && <div className={styles.shopMenu} id="shop-menu">
-      <div className={styles.shopHeading}><span>Encuentra tu próxima joya</span><Link href="/colecciones" onClick={close}>Ver todo <ArrowUpRight size={15} /></Link></div>
+      <div className={styles.shopHeading}><button ref={shopBackRef} type="button" className={styles.shopBack} onClick={() => { setShop(false); shopToggleRef.current?.focus(); }}>← Volver al menú</button><span>Encuentra tu próxima joya</span><Link href="/colecciones" onClick={close}>Ver todo <ArrowUpRight size={15} /></Link></div>
       <div className={styles.categories}>{categoryDirectory.map((item, index) => <div key={item.slug} className={styles.categoryGroup}><Link className={styles.categoryMain} href={`/colecciones?category=${item.slug}`} onClick={close}><small>0{index + 1}</small><strong>{item.name}</strong><span>{item.detail}</span><ArrowUpRight size={18} /></Link><div className={styles.subcategories}>{item.subcategories.map(sub => <Link key={sub.slug} href={`/colecciones?category=${item.slug}&subcategory=${sub.slug}`} onClick={close}>{sub.name}</Link>)}</div></div>)}</div>
       {sessionUser && <button className={styles.signOut} type="button" onClick={async () => { await signOut(); close(); router.push("/"); }}>Cerrar sesión</button>}
     </div>}

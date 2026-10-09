@@ -2,7 +2,7 @@
 import Image from "@/components/StoreImage";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Gift, Gem, MessageCircle, PackageCheck, ArrowRight } from "lucide-react";
+import { ArrowUpRight, Gift, Gem, MessageCircle, PackageCheck, ArrowRight, ChevronDown } from "lucide-react";
 import BrandIntro from "@/components/BrandIntro";
 import { BrandMark } from "@/components/Brand";
 import HeroCarousel from "@/components/HeroCarousel";
@@ -17,6 +17,15 @@ import { supabase } from "@/utils/supabaseClient";
 import styles from "./page.module.css";
 
 const benefits = [ { icon: Gem, title: "Detalles que importan", text: "Te ayudamos a conocer los materiales y acabados de cada pieza." }, { icon: Gift, title: "Un regalo con intención", text: "Encuentra el detalle para celebrar a alguien especial. Incluyéndote a ti." }, { icon: MessageCircle, title: "Estamos para ti", text: "Asesoría cercana para elegir tu joya, talla y cuidados." }, { icon: PackageCheck, title: "Entrega coordinada", text: "Confirma disponibilidad, destino y envío con nuestro equipo." } ];
+
+function CategoryStyles({ category, presentation }: { category: Category; presentation: NonNullable<ReturnType<typeof categoryPresentation>> }) {
+  const [open, setOpen] = useState(false);
+  const id = `styles-${category.slug}`;
+  return <div className={styles.categoryStyles}>
+    <button type="button" className={styles.styleToggle} aria-expanded={open} aria-controls={id} aria-label={`Estilos de ${category.name}`} onClick={() => setOpen(!open)}>Estilos <ChevronDown size={14} aria-hidden="true" /></button>
+    <div id={id} className={`${styles.subcategoryLinks} ${open ? styles.stylesOpen : ""}`} aria-label={`Estilos de ${category.name}`}>{presentation.subcategories.map(subcategory => <Link key={subcategory.slug} href={`/colecciones?category=${category.slug}&subcategory=${subcategory.slug}`}>{subcategory.name}</Link>)}</div>
+  </div>;
+}
 
 export default function Home() {
   const [featured, setFeatured] = useState<Product[]>([]);
@@ -47,12 +56,12 @@ export default function Home() {
       <div className={styles.sectionHeader}><div><span className={styles.kicker}>ELIGE TU FORMA DE BRILLAR</span><h2>Un universo de detalles.</h2></div><Link className={styles.textLink} href="/colecciones">Explorar la tienda <ArrowUpRight size={16} /></Link></div>
       <div className={styles.categoryGrid}>{categories.map((category, index) => {
         const presentation = categoryPresentation(category.slug);
-        return <article key={category.id} className={styles.categoryCard}>
+        return <article key={category.slug} className={`${styles.categoryCard} ${category.slug === "charms" ? styles.charmsCard : ""}`}>
           <Link href={`/colecciones?category=${category.slug}`} aria-label={`Explorar ${category.name}`}>
-            <div className={`${styles.categoryVisual} ${presentation?.tone === "gold" ? styles.categoryGold : styles.categoryBlack}`}><span className={styles.categoryNumber}>{String(index + 1).padStart(2, "0")}</span><Image src={category.image_url || "/images/product-placeholder.svg"} alt={`${category.name}, imagen de referencia Killaq`} fill className={styles.categoryImage} sizes="(max-width: 700px) 45vw, (max-width: 1000px) 30vw, 20vw" /><span className={styles.categoryExplore}><ArrowUpRight size={18} /></span></div>
+            <div className={`${styles.categoryVisual} ${presentation?.tone === "gold" ? styles.categoryGold : styles.categoryBlack}`}><span className={styles.categoryNumber}>{String(index + 1).padStart(2, "0")}</span><Image src={category.image_url || "/images/product-placeholder.svg"} alt={`${category.name}, imagen de referencia Killaq`} fill className={styles.categoryImage} sizes="(max-width: 700px) 45vw, (max-width: 1100px) 30vw, 20vw" /><span className={styles.categoryExplore}><ArrowUpRight size={18} /></span></div>
             <h3>{category.name}</h3><p>{presentation?.detail || "Una pieza para tu historia"}</p>
           </Link>
-          {presentation && <div className={styles.subcategoryLinks} aria-label={`Estilos de ${category.name}`}>{presentation.subcategories.map(subcategory => <Link key={subcategory.slug} href={`/colecciones?category=${category.slug}&subcategory=${subcategory.slug}`}>{subcategory.name}</Link>)}</div>}
+          {presentation && <CategoryStyles category={category} presentation={presentation} />}
         </article>;
       })}</div>
       <p className={styles.referenceNote}>Imágenes de referencia del universo Killaq.</p>

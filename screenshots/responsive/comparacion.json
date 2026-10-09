@@ -1,0 +1,527 @@
+{
+  "baselineCommit": "97c719e4b93b11131a0bf3613e0e829950e5dc9c",
+  "desktop": [
+    {
+      "name": "carrito",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 1426,
+      "afterHeight": 1426,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 790,
+      "changedPercent": 0.038472,
+      "bounds": {
+        "x": 95,
+        "y": 90,
+        "width": 85,
+        "height": 1043
+      }
+    },
+    {
+      "name": "catalogo",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 1950,
+      "afterHeight": 1950,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 834,
+      "changedPercent": 0.029701,
+      "bounds": {
+        "x": 95,
+        "y": 90,
+        "width": 662,
+        "height": 1568
+      }
+    },
+    {
+      "name": "coleccion",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 1950,
+      "afterHeight": 1950,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 143718,
+      "changedPercent": 5.118162,
+      "bounds": {
+        "x": 95,
+        "y": 90,
+        "width": 1293,
+        "height": 1568
+      }
+    },
+    {
+      "name": "inicio",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 3566,
+      "afterHeight": 3566,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 2638,
+      "changedPercent": 0.051373,
+      "bounds": {
+        "x": 57,
+        "y": 90,
+        "width": 856,
+        "height": 3183
+      }
+    },
+    {
+      "name": "login",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 900,
+      "afterHeight": 900,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 279,
+      "changedPercent": 0.021528,
+      "bounds": {
+        "x": 679,
+        "y": 297,
+        "width": 157,
+        "height": 347
+      }
+    },
+    {
+      "name": "ofertas",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 1426,
+      "afterHeight": 1426,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 1241,
+      "changedPercent": 0.060435,
+      "bounds": {
+        "x": 32,
+        "y": 90,
+        "width": 171,
+        "height": 1043
+      }
+    },
+    {
+      "name": "pagina-ausente",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 1426,
+      "afterHeight": 1426,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 1657,
+      "changedPercent": 0.080694,
+      "bounds": {
+        "x": 95,
+        "y": 90,
+        "width": 734,
+        "height": 1043
+      }
+    },
+    {
+      "name": "perfil",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 900,
+      "afterHeight": 900,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 279,
+      "changedPercent": 0.021528,
+      "bounds": {
+        "x": 679,
+        "y": 297,
+        "width": 157,
+        "height": 347
+      }
+    },
+    {
+      "name": "personalizada",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 2604,
+      "afterHeight": 2604,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 5150,
+      "changedPercent": 0.137342,
+      "bounds": {
+        "x": 95,
+        "y": 90,
+        "width": 961,
+        "height": 2221
+      }
+    },
+    {
+      "name": "producto-ausente",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 1426,
+      "afterHeight": 1426,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 481,
+      "changedPercent": 0.023424,
+      "bounds": {
+        "x": 95,
+        "y": 90,
+        "width": 77,
+        "height": 1043
+      }
+    },
+    {
+      "name": "reclamaciones",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 1636,
+      "afterHeight": 1636,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 1118,
+      "changedPercent": 0.047457,
+      "bounds": {
+        "x": 95,
+        "y": 90,
+        "width": 179,
+        "height": 1253
+      }
+    },
+    {
+      "name": "registro",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 900,
+      "afterHeight": 900,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 271,
+      "changedPercent": 0.02091,
+      "bounds": {
+        "x": 679,
+        "y": 202,
+        "width": 146,
+        "height": 536
+      }
+    },
+    {
+      "name": "universo",
+      "width": 1440,
+      "sameSize": true,
+      "beforeHeight": 2071,
+      "afterHeight": 2071,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 1633,
+      "changedPercent": 0.054757,
+      "bounds": {
+        "x": 95,
+        "y": 90,
+        "width": 864,
+        "height": 1688
+      }
+    },
+    {
+      "name": "carrito",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 1426,
+      "afterHeight": 1426,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 776,
+      "changedPercent": 0.028343,
+      "bounds": {
+        "x": 354,
+        "y": 90,
+        "width": 77,
+        "height": 1043
+      }
+    },
+    {
+      "name": "catalogo",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 1950,
+      "afterHeight": 1950,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 820,
+      "changedPercent": 0.021902,
+      "bounds": {
+        "x": 354,
+        "y": 90,
+        "width": 643,
+        "height": 1568
+      }
+    },
+    {
+      "name": "coleccion",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 1950,
+      "afterHeight": 1950,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 143704,
+      "changedPercent": 3.838248,
+      "bounds": {
+        "x": 354,
+        "y": 90,
+        "width": 1274,
+        "height": 1568
+      }
+    },
+    {
+      "name": "inicio",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 3580,
+      "afterHeight": 3580,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 2641,
+      "changedPercent": 0.038422,
+      "bounds": {
+        "x": 317,
+        "y": 90,
+        "width": 844,
+        "height": 3197
+      }
+    },
+    {
+      "name": "login",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 900,
+      "afterHeight": 900,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 279,
+      "changedPercent": 0.016146,
+      "bounds": {
+        "x": 919,
+        "y": 297,
+        "width": 157,
+        "height": 347
+      }
+    },
+    {
+      "name": "ofertas",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 1426,
+      "afterHeight": 1426,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 1227,
+      "changedPercent": 0.044815,
+      "bounds": {
+        "x": 260,
+        "y": 90,
+        "width": 171,
+        "height": 1043
+      }
+    },
+    {
+      "name": "pagina-ausente",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 1426,
+      "afterHeight": 1426,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 1643,
+      "changedPercent": 0.060009,
+      "bounds": {
+        "x": 354,
+        "y": 90,
+        "width": 715,
+        "height": 1043
+      }
+    },
+    {
+      "name": "perfil",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 900,
+      "afterHeight": 900,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 279,
+      "changedPercent": 0.016146,
+      "bounds": {
+        "x": 919,
+        "y": 297,
+        "width": 157,
+        "height": 347
+      }
+    },
+    {
+      "name": "personalizada",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 2621,
+      "afterHeight": 2621,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 5142,
+      "changedPercent": 0.10218,
+      "bounds": {
+        "x": 354,
+        "y": 90,
+        "width": 942,
+        "height": 2238
+      }
+    },
+    {
+      "name": "producto-ausente",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 1426,
+      "afterHeight": 1426,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 467,
+      "changedPercent": 0.017057,
+      "bounds": {
+        "x": 354,
+        "y": 90,
+        "width": 77,
+        "height": 1043
+      }
+    },
+    {
+      "name": "reclamaciones",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 1636,
+      "afterHeight": 1636,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 1104,
+      "changedPercent": 0.035147,
+      "bounds": {
+        "x": 354,
+        "y": 90,
+        "width": 160,
+        "height": 1253
+      }
+    },
+    {
+      "name": "registro",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 900,
+      "afterHeight": 900,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 271,
+      "changedPercent": 0.015683,
+      "bounds": {
+        "x": 919,
+        "y": 202,
+        "width": 146,
+        "height": 536
+      }
+    },
+    {
+      "name": "universo",
+      "width": 1920,
+      "sameSize": true,
+      "beforeHeight": 2072,
+      "afterHeight": 2072,
+      "sameSections": true,
+      "sameFooterLinks": true,
+      "changedPixels": 1639,
+      "changedPercent": 0.041199,
+      "bounds": {
+        "x": 354,
+        "y": 90,
+        "width": 845,
+        "height": 1690
+      }
+    }
+  ],
+  "mobile": [
+    {
+      "name": "carrito",
+      "beforeHeight": 1869,
+      "afterHeight": 1256,
+      "reductionPercent": 32.8
+    },
+    {
+      "name": "catalogo",
+      "beforeHeight": 1869,
+      "afterHeight": 1347,
+      "reductionPercent": 27.9
+    },
+    {
+      "name": "coleccion",
+      "beforeHeight": 1869,
+      "afterHeight": 1423,
+      "reductionPercent": 23.9
+    },
+    {
+      "name": "inicio",
+      "beforeHeight": 5488,
+      "afterHeight": 4551,
+      "reductionPercent": 17.1
+    },
+    {
+      "name": "login",
+      "beforeHeight": 900,
+      "afterHeight": 900,
+      "reductionPercent": 0
+    },
+    {
+      "name": "ofertas",
+      "beforeHeight": 1869,
+      "afterHeight": 1256,
+      "reductionPercent": 32.8
+    },
+    {
+      "name": "pagina-ausente",
+      "beforeHeight": 1869,
+      "afterHeight": 1256,
+      "reductionPercent": 32.8
+    },
+    {
+      "name": "perfil",
+      "beforeHeight": 900,
+      "afterHeight": 900,
+      "reductionPercent": 0
+    },
+    {
+      "name": "personalizada",
+      "beforeHeight": 4148,
+      "afterHeight": 3487,
+      "reductionPercent": 15.9
+    },
+    {
+      "name": "producto-ausente",
+      "beforeHeight": 1869,
+      "afterHeight": 1571,
+      "reductionPercent": 15.9
+    },
+    {
+      "name": "reclamaciones",
+      "beforeHeight": 2645,
+      "afterHeight": 2280,
+      "reductionPercent": 13.8
+    },
+    {
+      "name": "registro",
+      "beforeHeight": 900,
+      "afterHeight": 900,
+      "reductionPercent": 0
+    },
+    {
+      "name": "universo",
+      "beforeHeight": 3305,
+      "afterHeight": 2211,
+      "reductionPercent": 33.1
+    }
+  ]
+}

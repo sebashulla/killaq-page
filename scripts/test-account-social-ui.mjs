@@ -109,8 +109,8 @@ async function context(width, mode = "guest") {
       json: { message: "Unrecognized synthetic request blocked" },
     });
   });
-  await c.route("https://www.instagram.com/**", (r) => r.abort());
-  await c.route("https://www.tiktok.com/**", (r) => r.abort());
+  await c.route("https://www.instagram.com/**", (r) => r.fulfill({ contentType: "text/html; charset=utf-8", body: "<!doctype html><html><body>Publicación sintética de Instagram</body></html>" }));
+  await c.route("https://www.tiktok.com/**", (r) => r.fulfill({ contentType: "text/html; charset=utf-8", body: '<!doctype html><html><body>Video sintético de TikTok<script>parent.postMessage({type:"onPlayerReady","x-tiktok-player":true},"*")</script></body></html>' }));
   if (!["guest", "rate-limit", "mail-failure"].includes(mode)) {
     const key =
       "sb-" + new URL(authOrigin).hostname.split(".")[0] + "-auth-token";
@@ -262,28 +262,26 @@ try {
     await expect(
       wall.getByRole("link", { name: "Abrir en Instagram" }),
     ).toHaveCount(3);
-    expect(await wall.locator("iframe").count()).toBe(0);
-    await wall
-      .getByRole("button", { name: "Activar publicación externa", exact: true })
-      .first()
-      .click();
-    await expect(wall.locator("iframe").first()).toHaveAttribute(
+    await expect(wall.locator("iframe")).toHaveCount(6);
+    expect(await wall.getByRole("button", { name: /Activar/ }).count()).toBe(0);
+    await expect(wall.locator('iframe[src*="instagram.com"]').first()).toHaveAttribute(
       "src",
       "https://www.instagram.com/p/DXN94fWjQKx/embed",
     );
-    await wall
-      .getByRole("button", { name: "Cerrar publicación externa" })
-      .click();
-    expect(await wall.locator("iframe").count()).toBe(0);
-    await wall
-      .getByRole("button", { name: "Activar video externo", exact: true })
-      .first()
-      .click();
-    await expect(wall.locator("iframe").first()).toHaveAttribute(
+    await expect(wall.locator('iframe[src*="tiktok.com"]').first()).toHaveAttribute(
       "src",
-      "https://www.tiktok.com/embed/v2/7687753618568629522",
+      "https://www.tiktok.com/player/v1/7687753618568629522?autoplay=0&rel=0",
     );
-    await wall.getByRole("button", { name: "Cerrar video externo" }).click();
+    for (const frame of await wall.locator("iframe").all()) {
+      await expect(frame).toHaveAttribute("loading", "lazy");
+      await expect(frame).toHaveAttribute("referrerpolicy", "no-referrer");
+    }
+    const footer = p.locator("footer");
+    const phone = footer.locator('a[href="tel:+51912964356"]');
+    const social = footer.locator('a[href="https://www.instagram.com/joyeria_killaq/"]');
+    await expect(social).toBeVisible();
+    await expect(footer.locator('a[href="https://www.tiktok.com/@killaq_joyas"]')).toBeVisible();
+    expect((await social.boundingBox()).y).toBeGreaterThan((await phone.boundingBox()).y);
     expect(
       await p.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(width);
@@ -293,10 +291,57 @@ try {
     results.push({
       label: "social-wall",
       width,
-      externalOptIn: true,
+      automaticLazyEmbeds: true,
       posts: 6,
       overflow: false,
     });
+    await c.close();
+  }
+  // Player messages must come from the right origin AND the exact iframe.
+  {
+    const { c } = await context(393), p = await c.newPage();
+    await p.goto(origin + "/");
+    const wall = p.locator('section[aria-labelledby="killaq-social-title"]');
+    await expect(wall.locator('iframe')).toHaveCount(6);
+    const frame = wall.locator('iframe[src*="tiktok.com"]').first();
+    await frame.scrollIntoViewIfNeeded();
+    const content = await (await frame.elementHandle()).contentFrame();
+    await expect(content.locator('body')).toContainText('Video sintético');
+    await frame.evaluate((element) => window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://evil.example.test', source: element.contentWindow,
+      data: { type: 'onPlayerError', value: { errorCode: 3001 }, 'x-tiktok-player': true }
+    })));
+    await p.evaluate(() => window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://www.tiktok.com', source: window,
+      data: { type: 'onPlayerError', value: { errorCode: 3001 }, 'x-tiktok-player': true }
+    })));
+    await expect(wall.locator('iframe')).toHaveCount(6);
+    await content.evaluate(() => parent.postMessage({ type: 'onPlayerError', value: { errorCode: 3002 }, 'x-tiktok-player': true }, '*'));
+    await expect(wall.locator('iframe')).toHaveCount(6);
+    await content.evaluate(() => parent.postMessage({ type: 'onPlayerError', value: { errorCode: 3001 }, 'x-tiktok-player': true }, '*'));
+    await expect(wall.locator('iframe')).toHaveCount(5);
+    await expect(wall.getByRole('status').filter({ hasText: 'no está disponible aquí' })).toBeVisible();
+    await expect(wall.locator('a[href="https://www.tiktok.com/@killaq_joyas/video/7687753618568629522"]').first()).toBeVisible();
+    results.push({ label: 'player-error-fallback', forgedMessagesIgnored: true, playbackError: true, autoplayDenialIgnored: true });
+    await c.close();
+  }
+  {
+    const { c } = await context(393), p = await c.newPage();
+    await c.route('https://www.tiktok.com/player/v1/7687753618568629522*', r => r.fulfill({
+      contentType: 'text/html; charset=utf-8', body: '<!doctype html><html><body>Player unavailable</body></html>'
+    }));
+    await p.clock.install();
+    await p.goto(origin + '/');
+    const wall = p.locator('section[aria-labelledby="killaq-social-title"]');
+    await expect(wall.locator('iframe')).toHaveCount(6);
+    const frame = wall.locator('iframe[src*="7687753618568629522"]');
+    await frame.scrollIntoViewIfNeeded();
+    const content = await (await frame.elementHandle()).contentFrame();
+    await expect(content.locator('body')).toContainText('Player unavailable');
+    await p.clock.runFor(26000);
+    await expect(wall.locator('iframe[src*="7687753618568629522"]')).toHaveCount(0);
+    await expect(wall.getByRole('status').filter({ hasText: 'no está disponible aquí' })).toBeVisible();
+    results.push({ label: 'player-timeout-fallback', simulatedClock: true });
     await c.close();
   }
   await writeFile(
@@ -304,7 +349,7 @@ try {
     JSON.stringify(results, null, 2),
   );
   console.log(
-    `${results.length} browser states passed: recovery/update/errors/responsive/social opt-in; synthetic Auth only.`,
+    `${results.length} browser states passed: recovery/update/errors/responsive/automatic social embeds; synthetic Auth only.`,
   );
 } finally {
   await browser.close();

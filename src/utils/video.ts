@@ -15,17 +15,26 @@ export function getSocialEmbedSrc(url: string, platform?: string) {
   const trimmedUrl = url.trim();
   if (!trimmedUrl) return "";
 
-  const instagramMatch = trimmedUrl.match(/instagram\.com\/(p|reel|tv)\/([^/?#]+)/i);
+  let parsed: URL;
+  try { parsed = new URL(trimmedUrl); } catch { return ""; }
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password) return "";
+  const host = parsed.hostname.toLowerCase();
+  const instagramMatch = ["instagram.com", "www.instagram.com"].includes(host)
+    ? parsed.pathname.match(/^\/(p|reel|tv)\/([A-Za-z0-9_-]+)\/?(?:embed\/?)?$/)
+    : null;
   if (instagramMatch) {
     return `https://www.instagram.com/${instagramMatch[1]}/${instagramMatch[2]}/embed`;
   }
 
-  const tiktokMatch = trimmedUrl.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/i) ||
-    trimmedUrl.match(/tiktok\.com\/(?:embed\/v2\/)?(\d+)/i);
+  const tiktokMatch = ["tiktok.com", "www.tiktok.com"].includes(host)
+    ? parsed.pathname.match(/^\/@[^/]+\/video\/(\d+)\/?$/) ||
+      parsed.pathname.match(/^\/(?:embed\/v2|player\/v1)\/(\d+)\/?$/)
+    : null;
   if (tiktokMatch) {
-    return `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`;
+    return `https://www.tiktok.com/player/v1/${tiktokMatch[1]}?autoplay=0&rel=0`;
   }
 
   if (platform === "instagram" || platform === "tiktok") return "";
-  return trimmedUrl;
+  // Unknown providers get a link, never an arbitrary third-party iframe.
+  return "";
 }

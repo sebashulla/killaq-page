@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { ArrowUpRight, Camera, Music } from "lucide-react";
 import {
   SOCIAL_PROFILES,
@@ -65,6 +66,7 @@ export default function SocialWall() {
                   {channel.posts.map((post) => (
                     <div key={post.url}>
                       <VideoFrame
+                        autoLoad
                         video={{
                           platform,
                           title: post.title,
@@ -90,7 +92,9 @@ export default function SocialWall() {
                   {channel.source === "api"
                     ? "Publicaciones recientes consultadas desde la cuenta conectada."
                     : "Tres publicaciones seleccionadas por KILLAQ. Puedes ver más novedades en nuestro perfil."}{" "}
-                  El contenido externo se carga cuando tú lo activas.
+                  Las publicaciones se cargan desde {profile.name} al acercarte
+                  a esta sección. Ese servicio puede recibir datos técnicos y
+                  usar sus propias tecnologías. <Link href="/politica-de-privacidad">Información de privacidad</Link>.
                 </p>
               </>
             ) : (

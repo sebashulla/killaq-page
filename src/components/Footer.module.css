@@ -14,6 +14,11 @@
 .column h3 { font-family: var(--font-inter), sans-serif; font-size: .61rem; letter-spacing: .1em; font-weight: 500; text-transform: uppercase; margin-bottom: 12px; color: #d8c49b; }
 .column a, .column span { color: #cbc7bf; font-size: .67rem; line-height: 1.6; }
 .column a:hover { color: white; }
+.socialLinks { display: grid; gap: 8px; width: 100%; }
+.socialLinks a { display: flex; align-items: center; gap: 8px; min-height: 36px; }
+.socialLinks svg { color: #d8c49b; flex-shrink: 0; }
+.emailContact { display: grid; gap: 4px; }
+.emailContact small { color: #aaa49a; font-size: .67rem; line-height: 1.6; }
 .contact { display: inline-flex; align-items: center; gap: 13px; padding-bottom: 10px; border-bottom: 1px solid #e5d5b040; }
 .groupToggle { display: none; }
 .groupLinks { display: contents; }
@@ -46,6 +51,7 @@
   .brand > span { justify-self: start; }
   .column:last-child { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); gap: 6px 16px; }
   .column:last-child h3, .contact { grid-column: 1 / -1; }
+  .column:last-child .phone, .column:last-child .socialLinks, .column:last-child .emailContact { grid-column: 1 / -1; }
   .column:last-child a { overflow-wrap: anywhere; }
   .column:last-child p { margin: 0; }
   .bottom { display: grid; grid-template-columns: 1fr 1fr; padding: 22px 6%; gap: 12px; }

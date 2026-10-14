@@ -29,6 +29,17 @@ function check(name, fn) {
   fn();
   checks.push({ name, passed: true });
 }
+await writeFile('artifacts/account-tests/video.mjs', ts.transpileModule(
+  await readFile('src/utils/video.ts', 'utf8'),
+  { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }
+).outputText);
+const video = await import('../artifacts/account-tests/video.mjs');
+check('Official embed hosts only; TikTok uses current player without autoplay and tracking', () => {
+  assert.equal(video.getSocialEmbedSrc('https://www.tiktok.com/@killaq_joyas/video/123?tracking=private'), 'https://www.tiktok.com/player/v1/123?autoplay=0&rel=0');
+  assert.equal(video.getSocialEmbedSrc('https://www.tiktok.com/embed/v2/123'), 'https://www.tiktok.com/player/v1/123?autoplay=0&rel=0');
+  assert.equal(video.getSocialEmbedSrc('https://www.instagram.com/reel/ABC_01/?tracking=private'), 'https://www.instagram.com/reel/ABC_01/embed');
+  for (const url of ['javascript:alert(1)', 'http://www.instagram.com/p/ABC/', 'https://instagram.com.evil.test/p/ABC/', 'https://evil.test/instagram.com/p/ABC/', 'https://user:password@www.instagram.com/p/ABC/', 'https://www.instagram.com/accounts/login/', 'https://other.test/embed']) assert.equal(video.getSocialEmbedSrc(url), '');
+});
 check(
   "Recovery destination uses the site origin and never a caller-supplied next URL",
   () => {

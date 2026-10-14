@@ -13,6 +13,7 @@
     "test": "node --test scripts/test-cart.mjs scripts/test-storefront.mjs && node scripts/test-sql.mjs && node scripts/test-complaints.mjs && node scripts/test-admin.mjs && node scripts/test-analytics.mjs && node scripts/test-account-social.mjs",
     "test:account": "node scripts/test-account-social.mjs",
     "test:account:ui": "node scripts/test-account-social-ui.mjs",
+    "test:product:ui": "node scripts/test-product-gallery-ui.mjs",
     "test:analytics": "node scripts/test-analytics.mjs",
     "test:analytics:ui": "node scripts/test-analytics-ui.mjs",
     "test:admin": "node scripts/test-admin.mjs",

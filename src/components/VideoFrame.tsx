@@ -105,7 +105,7 @@ export default function VideoFrame({
           <div className={styles.activation} role="status">
             <p>{mediaLabel === "publicación" ? "Esta publicación" : "Este video"} no está disponible aquí en este momento.</p>
             <a href={source.url} target="_blank" rel="noopener noreferrer">
-              Abrir en {getVideoPlatformLabel(source.platform)}
+              {directVideo ? "Abrir video" : `Abrir en ${getVideoPlatformLabel(source.platform)}`}
             </a>
           </div>
         ) : !allowed ? (
@@ -128,11 +128,13 @@ export default function VideoFrame({
           </div>
         ) : directVideo ? (
           <video
+            aria-label={source.title}
             className={styles.video}
             controls
             playsInline
             preload="metadata"
             poster={source.posterUrl || undefined}
+            onError={() => setFailedUrl(source.url)}
           >
             <source src={source.url} />
           </video>

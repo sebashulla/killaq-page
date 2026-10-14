@@ -1,0 +1,58 @@
+.gallery { min-width: 0; align-self: start; }
+.stage { position: relative; aspect-ratio: 1 / 1; background: var(--color-cream); overflow: hidden; }
+.imageButton { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; background: transparent; cursor: zoom-in; overflow: hidden; }
+.image { object-fit: contain; transition: transform .65s cubic-bezier(.22,.61,.36,1); transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%); }
+.expand { position: absolute; right: 20px; top: 20px; z-index: 1; display: flex; gap: 8px; align-items: center; background: #fffdf7ed; color: var(--color-black); padding: 11px 13px; font-size: .7rem; letter-spacing: .04em; }
+.reference { position: absolute; pointer-events: none; left: 20px; top: 20px; background: #181713e8; border: 1px solid #d7b96e70; color: #eddbb2; font-size: .62rem; letter-spacing: .09em; text-transform: uppercase; padding: 11px; }
+.controls { position: absolute; display: flex; align-items: center; gap: 5px; bottom: 18px; right: 18px; background: #fffdf7f5; color: var(--color-black); }
+.controls button, .lightbox button { display: grid; place-items: center; min-width: 44px; min-height: 44px; cursor: pointer; color: inherit; border: 0; background: transparent; }
+.controls button:hover { background: var(--color-gold-pale); }
+.controls > span { font-size: .65rem; min-width: 49px; text-align: center; }
+.caption { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 0; border-bottom: 1px solid var(--color-border); }
+.caption > span:first-child { font-family: var(--font-playfair), serif; font-size: 1.1rem; }
+.desktopHint, .touchHint { font-size: .67rem; color: var(--color-gray-light); line-height: 1.6; text-align: right; }
+.touchHint { display: none; }
+.thumbnails { display: flex; gap: 12px; overflow-x: auto; padding: 16px 2px 8px; scrollbar-width: thin; }
+.thumbnail { flex: 0 0 76px; height: 80px; position: relative; border: 1px solid var(--color-border); background: var(--color-cream); cursor: pointer; overflow: hidden; }
+.thumbnail[aria-pressed=true] { border-color: var(--color-gold-text); box-shadow: 0 2px 0 var(--color-gold-text); }
+.thumbnailImage { object-fit: cover; }
+.videoThumb { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 5px; flex-direction: column; color: var(--color-gold-deep); font-size: .63rem; }
+.thumbnail:has(img) .videoThumb { background: #15151580; color: white; }
+.videoStage { position: absolute; inset: 0; background: #151515; }
+.videoStage > article { height: 100%; border: 0; border-radius: 0; }
+.videoStage > article > div:first-child { aspect-ratio: auto; height: 100%; }
+.videoStage > article > div:last-child { display: none; }
+.videoStage video { object-fit: contain; }
+.lightbox { position: fixed; inset: 0; margin: auto; width: min(1440px, calc(100vw - 48px)); height: calc(100dvh - 48px); max-width: none; max-height: none; border: 1px solid #d7b96e45; background: #111; color: #fffaf0; padding: 0; }
+.lightbox::backdrop { background: #101010de; backdrop-filter: blur(6px); }
+:global(body):has(.lightbox[open]) { overflow: hidden; }
+.lightboxContent { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.lightboxHeader { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; gap: 16px; border-bottom: 1px solid #ffffff26; }
+.lightboxHeader span { color: #d7b96e; font-size: .65rem; letter-spacing: .3em; }
+.lightboxHeader h2 { font-size: 1.2rem; font-weight: 400; margin-top: 6px; overflow-wrap: anywhere; }
+.lightboxActions { display: flex; gap: 8px; }
+.lightbox button:hover { color: #d7b96e; }
+.lightbox button:focus-visible { outline-offset: -3px; }
+.lightboxViewport { overflow: auto; overscroll-behavior: contain; }
+.lightboxCanvas { position: relative; width: 100%; height: 100%; }
+.lightboxCanvas.enlarged { width: 180%; height: 180%; }
+.lightboxImage { object-fit: contain; }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; font-size: .8rem; color: #d7b96e; }
+.lightboxFooter { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 8px 16px; border-top: 1px solid #ffffff26; min-height: 60px; }
+.lightboxFooter p { font-size: .72rem; color: #e5dccb; }
+@media (hover: hover) and (pointer: fine) { .imageButton:hover .image { transform: scale(1.85); } }
+@media (hover: none), (pointer: coarse) { .desktopHint { display: none; } .touchHint { display: inline; } }
+@media (max-width: 700px) {
+  .expand { top: 12px; right: 12px; padding: 10px; font-size: .65rem; }
+  .reference { top: 12px; left: 12px; font-size: .56rem; padding: 10px 8px; }
+  .controls { bottom: 12px; right: 12px; }
+  .caption { padding: 14px 0; }
+  .caption > span:first-child { font-size: 1rem; }
+  .lightbox { width: 100vw; height: 100dvh; border: 0; }
+  .lightboxHeader { padding: max(15px, env(safe-area-inset-top)) 14px 15px; gap: 8px; }
+  .lightboxHeader h2 { font-size: 1rem; line-height: 1.35; }
+  .lightboxHeader > div:first-child { min-width: 0; }
+  .lightboxActions { gap: 0; }
+  .lightboxFooter { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  .desktopHint { display: none; } .touchHint { display: inline; }
+}

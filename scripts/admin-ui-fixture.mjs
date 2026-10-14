@@ -175,6 +175,18 @@ const server = createServer(async (req, res) => {
     failTable = body.table || "";
     return send(200, {});
   }
+  if (url.pathname === "/__seed-product-gallery") {
+    const product = data.products[0];
+    data.product_images.push(...["/images/categories/collares-v1.webp", "/images/categories/aretes-v1.webp", "/images/categories/pulseras-v1.webp"].map((url, index) => ({ id: index + 3, product_id: product.id, url, alt_text: `Fotografía de prueba ${index + 3}`, sort_order: index + 2 })));
+    data.product_videos = [
+      { id: 1, product_id: product.id, video_type: "upload", title: "Video sintético de prueba", url: "https://media.example.test/piece.webm", poster_url: "/images/categories/anillos-v1.webp", sort_order: 0, is_active: true },
+      { id: 2, product_id: product.id, video_type: "external", title: "Video inactivo", url: "https://media.example.test/inactive.webm", sort_order: 1, is_active: false },
+    ];
+    const id = "00000000-0000-0000-0000-000000000013";
+    data.products.push({ ...product, id, slug: "muestra-prueba", name: "Muestra digital de prueba", sku: "KILLAQ-DEMO-QA", stock: 0, category_id: null });
+    data.product_images.push({ ...data.product_images[0], id: 99, product_id: id });
+    return send(200, { seeded: true });
+  }
   if (url.pathname === "/__seed-campaigns") {
     data.hero_slides = [
       {
@@ -305,6 +317,8 @@ const server = createServer(async (req, res) => {
     if (["select", "order", "limit", "offset"].includes(key)) continue;
     if (value.startsWith("eq."))
       rows = rows.filter((r) => String(r[key]) === value.slice(3));
+    if (value.startsWith("neq."))
+      rows = rows.filter((r) => String(r[key]) !== value.slice(4));
     if (value.startsWith("ilike."))
       rows = rows.filter((r) =>
         String(r[key] || "")

@@ -159,6 +159,12 @@
 .section > .help {
   margin: -6px 0 18px;
 }
+.productMedia { border-top: 1px solid #e4ddd1; padding-top: 16px; }
+.productMedia > summary { cursor: pointer; }
+.productVideoPreview { margin-top: 20px; max-width: 560px; }
+.productVideoPreview h3 { font: 600 .85rem var(--font-inter), sans-serif; margin-bottom: 12px; }
+.productVideoPreview > video { width: 100%; max-height: 340px; background: #151515; display: block; }
+.productVideoPreview > .help { margin: 12px 0; }
 .field {
   display: flex;
   flex-direction: column;

@@ -22,7 +22,11 @@ const getProduct = cache(async (slug: string) => {
     .eq("is_active", true)
     .maybeSingle();
   if (error) throw new Error("No se pudo cargar el catálogo");
-  return data ? normalizeProduct(data) : null;
+  if (!data) return null;
+  const videos = await client.from("product_videos")
+    .select("id, product_id, video_type, title, url, poster_url, sort_order, is_active")
+    .eq("product_id", data.id).eq("is_active", true).order("sort_order", { ascending: true });
+  return normalizeProduct({ ...data, product_videos: videos.data || [] });
 });
 type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

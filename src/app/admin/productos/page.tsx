@@ -2,10 +2,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Plus, ArrowLeft, Search } from "lucide-react";
 import Image from "@/components/StoreImage";
+import VideoFrame from "@/components/VideoFrame";
 import { supabase } from "@/utils/supabaseClient";
 import { slugify } from "@/utils/format";
 import { adminApi, verifyPreviewImage } from "@/lib/admin/client";
-import { validateProduct } from "@/lib/admin/validation";
+import { validateProduct, videoUrl } from "@/lib/admin/validation";
 import {
   Field,
   Section,
@@ -88,7 +89,23 @@ export default function Products() {
     [form, setForm] = useState(blank),
     [initial, setInitial] = useState(JSON.stringify(blank)),
     [fields, setFields] = useState<Record<string, string>>({}),
-    [videoFile, setVideoFile] = useState<File | null>(null);
+    [videoFile, setVideoFile] = useState<File | null>(null),
+    [localVideoUrl, setLocalVideoUrl] = useState("");
+  useEffect(() => () => { if (localVideoUrl) URL.revokeObjectURL(localVideoUrl); }, [localVideoUrl]);
+  const videoInput = useRef<HTMLInputElement>(null);
+  let validVideo = false;
+  try { if (form.video_url) validVideo = Boolean(videoUrl(form.video_url, form.video_type)); } catch { /* Preview only validated URLs. */ }
+  function selectVideo(file: File | null) {
+    if (file && (!["video/mp4", "video/webm", "video/quicktime"].includes(file.type) || file.size > 100 * 1024 * 1024)) {
+      setError("Usa MP4, WebM o MOV de hasta 100 MB.");
+      setVideoFile(null); setLocalVideoUrl("");
+      if (videoInput.current) videoInput.current.value = "";
+      return;
+    }
+    setVideoFile(file);
+    if (!file && videoInput.current) videoInput.current.value = "";
+    setLocalVideoUrl(file ? URL.createObjectURL(file) : "");
+  }
   const generation = useRef(0);
   const dirty = editor && (JSON.stringify(form) !== initial || !!videoFile);
   useDirtyGuard(dirty);
@@ -188,6 +205,7 @@ export default function Products() {
     setEditing(product || null);
     setEditor(true);
     setVideoFile(null);
+    setLocalVideoUrl("");
     setError("");
     setFields({});
     window.scrollTo({ top: 0 });
@@ -198,6 +216,7 @@ export default function Products() {
       return;
     setEditor(false);
     setVideoFile(null);
+    setLocalVideoUrl("");
     setError("");
   }
   async function save(event: React.FormEvent) {
@@ -243,6 +262,7 @@ export default function Products() {
       });
       setEditor(false);
       setVideoFile(null);
+      setLocalVideoUrl("");
       setNotice("Pieza y archivos guardados correctamente.");
       await load();
     } catch (e) {
@@ -431,7 +451,8 @@ export default function Products() {
                   "HTTPS o archivo de /images/. Usa la fotografía del producto vendido.",
                 )}
                 {input("image_alt", "Descripción accesible de la imagen")}
-                <details>
+                <p className={s.help}>Puedes añadir un video principal a la galería, junto a las fotografías. Es opcional y no impide publicar una pieza sin video.</p>
+                <details className={s.productMedia} open={Boolean(form.video_url || videoFile)}>
                   <summary className={s.secondary}>
                     Video de la pieza · opcional
                   </summary>
@@ -442,9 +463,10 @@ export default function Products() {
                           <select
                             id={id}
                             value={form.video_type}
-                            onChange={(e) =>
-                              change("video_type", e.target.value)
-                            }
+                            onChange={(e) => {
+                              change("video_type", e.target.value);
+                              selectVideo(null);
+                            }}
                           >
                             <option value="upload">Archivo subido</option>
                             <option value="instagram">Instagram</option>
@@ -466,10 +488,9 @@ export default function Products() {
                           <input
                             id={id}
                             type="file"
+                            ref={videoInput}
                             accept="video/mp4,video/webm,video/quicktime"
-                            onChange={(e) =>
-                              setVideoFile(e.target.files?.[0] || null)
-                            }
+                            onChange={(e) => selectVideo(e.target.files?.[0] || null)}
                           />
                         )}
                       </Field>
@@ -481,6 +502,13 @@ export default function Products() {
                       "Solo proveedores implementados o archivos directos. No se admiten páginas arbitrarias como iframe.",
                     )}
                     {input("video_poster", "Imagen previa del video")}
+                    {!localVideoUrl && form.video_url && !validVideo && <p className={s.help}>La vista previa aparecerá con un enlace válido para el proveedor elegido.</p>}
+                    {(localVideoUrl || validVideo) && <div className={s.productVideoPreview}>
+                      <h3>Vista previa del video</h3>
+                      {localVideoUrl ? <video key={localVideoUrl} aria-label="Vista previa del archivo seleccionado" src={localVideoUrl} controls playsInline preload="metadata" /> : <VideoFrame compact video={{ video_type: form.video_type as ProductVideo["video_type"], url: form.video_url, title: form.video_title || form.name || "Video de la pieza", poster_url: form.video_poster }} />}
+                      <p className={s.help}>{videoFile ? `${videoFile.name} · ${(videoFile.size / 1024 / 1024).toFixed(1)} MB. Se subirá al guardar.` : "El enlace se guardará con la pieza. Comprueba que corresponde al producto."}</p>
+                      <button type="button" className={s.secondary} onClick={() => { selectVideo(null); change("video_url", ""); }}>Quitar video principal</button>
+                    </div>}
                   </div>
                 </details>
               </Section>

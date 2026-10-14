@@ -16,6 +16,9 @@ import type { Category, Material, Product, Subcategory } from "@/types/catalog";
 import { categoryPresentation, presentCategories } from "@/data/taxonomy";
 import { supabase } from "@/utils/supabaseClient";
 import styles from "./page.module.css";
+import {useAnalytics,refreshAnalyticsContext} from '@/components/analytics/AnalyticsProvider';
+import {safeSearch} from '@/lib/analytics/core';
+import {trackOnce} from '@/lib/analytics/client';
 
 type SortKey = "relevance" | "price-asc" | "price-desc" | "newest";
 
@@ -58,6 +61,9 @@ function getSearchableText(product: Product) {
 
 export default function ColeccionesClient() {
   const searchParams = useSearchParams();
+  const analyticsState=useAnalytics();
+  const navigationQuery=searchParams.toString();
+  useEffect(()=>refreshAnalyticsContext(),[navigationQuery]);
   const selectedAudience = searchParams.get("audience") || "";
   const selectedCategory = searchParams.get("category") || "";
   const selectedSubcategory = searchParams.get("subcategory") || "";
@@ -99,7 +105,7 @@ export default function ColeccionesClient() {
       const [productsRes, categoriesRes, subcategoriesRes, materialsRes] = await Promise.all([
         supabase
           .from("products")
-          .select("id, slug, name, description, price, compare_price, stock, sizes_available, created_at, is_featured, categories(name, slug), subcategories(name, slug), materials(name, slug), product_images(url, alt_text, sort_order)")
+          .select("id, slug, name, description, sku, price, compare_price, stock, sizes_available, created_at, is_featured, categories(name, slug), subcategories(name, slug), materials(name, slug), product_images(url, alt_text, sort_order)")
           .eq("is_active", true)
           .order("created_at", { ascending: false }),
         supabase
@@ -161,6 +167,7 @@ export default function ColeccionesClient() {
       current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug]
     );
   };
+  useEffect(()=>{if(!loadingProducts&&!catalogError&&search.trim())trackOnce('search',{name:'search',term:safeSearch(search),results:filteredProducts.length});},[analyticsState.active,analyticsState.navigation,loadingProducts,catalogError,search,filteredProducts.length]);
 
   const category = categories.find(item => item.slug === selectedCategory);
   const databaseStyles = subcategories.filter(item => item.category_id === category?.id);
@@ -231,12 +238,13 @@ export default function ColeccionesClient() {
             </div>
           ) : (
             <div className={styles.productGrid}>
-              {filteredProducts.map((product) => (
+              {filteredProducts.map((product,index) => (
                 <ProductCard
                   key={product.id}
                   id={product.id}
                   slug={product.slug}
                   name={product.name}
+                  sku={product.sku}
                   price={Number(product.price)}
                   comparePrice={product.compare_price ? Number(product.compare_price) : null}
                   imageUrl={getPrimaryImage(product)}
@@ -244,6 +252,7 @@ export default function ColeccionesClient() {
                   materialName={product.materials?.name}
                   stock={product.stock}
                   requiresSize={Boolean(product.sizes_available?.length)}
+                  listId='catalog' position={index}
                 />
               ))}
             </div>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "@/utils/supabaseClient";
 import styles from "../auth.module.css";
+import LegalLinks from "@/components/LegalLinks";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -124,6 +125,7 @@ export default function RegisterPage() {
           <button type="submit" className={styles.submitButton} disabled={loading}>
             {loading ? "Creando cuenta..." : "Registrarse"}
           </button>
+          <LegalLinks privacyOnly />
         </form>
 
         <div className={styles.footer}>

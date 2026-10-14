@@ -17,7 +17,7 @@ export default function OffersPage() {
       setLoading(true);
       const { data } = await supabase
         .from("products")
-        .select("id, slug, name, description, price, compare_price, stock, sizes_available, created_at, is_featured, categories(name, slug), materials(name, slug), product_images(url, alt_text, sort_order)")
+        .select("id, slug, name, description, sku, price, compare_price, stock, sizes_available, created_at, is_featured, categories(name, slug), materials(name, slug), product_images(url, alt_text, sort_order)")
         .eq("is_active", true)
         .not("compare_price", "is", null)
         .order("created_at", { ascending: false });
@@ -53,12 +53,13 @@ export default function OffersPage() {
           </section>
         ) : (
           <section className={styles.grid}>
-            {offers.map((product) => (
+            {offers.map((product,index) => (
               <ProductCard
                 key={product.id}
                 id={product.id}
                 slug={product.slug}
                 name={product.name}
+                sku={product.sku}
                 price={Number(product.price)}
                 comparePrice={product.compare_price ? Number(product.compare_price) : null}
                 imageUrl={getPrimaryImage(product)}
@@ -66,6 +67,7 @@ export default function OffersPage() {
                 materialName={product.materials?.name}
                 stock={product.stock}
                 requiresSize={Boolean(product.sizes_available?.length)}
+                listId='offers' position={index}
               />
             ))}
           </section>

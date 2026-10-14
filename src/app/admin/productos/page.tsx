@@ -1,658 +1,884 @@
 "use client";
-
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Plus, ArrowLeft, Search } from "lucide-react";
 import Image from "@/components/StoreImage";
-import { useEffect, useState } from "react";
-import type { ProductImage, ProductVideo } from "@/types/catalog";
-import type { Subcategory, Collection } from "@/types/catalog";
-import { slugify } from "@/utils/format";
 import { supabase } from "@/utils/supabaseClient";
-import { getVideoPlatformLabel } from "@/utils/video";
-import styles from "../crud.module.css";
-
-interface Product {
+import { slugify } from "@/utils/format";
+import { adminApi, verifyPreviewImage } from "@/lib/admin/client";
+import { validateProduct } from "@/lib/admin/validation";
+import {
+  Field,
+  Section,
+  Notice,
+  Empty,
+  Loading,
+  Status,
+  useDirtyGuard,
+  adminStyles as s,
+} from "@/components/admin/AdminUI";
+import type { ProductImage, ProductVideo } from "@/types/catalog";
+type Product = {
   id: string;
   name: string;
   slug: string;
   description: string | null;
   price: number;
   compare_price: number | null;
-  category_id: number | null;
-  subcategory_id?: number | null;
-  collection_id?: number | null;
-  material_id: number | null;
   stock: number;
   sku: string | null;
-  sizes_available?: string[] | null;
+  category_id: number | null;
+  subcategory_id: number | null;
+  collection_id: number | null;
+  material_id: number | null;
+  sizes_available: string[] | null;
   is_featured: boolean;
   is_active: boolean;
-  categories?: { name: string } | null;
-  materials?: { name: string } | null;
-  product_images?: ProductImage[] | null;
-  product_videos?: ProductVideo[] | null;
-}
-
-interface Category {
-  id: number;
-  name: string;
-}
-
-interface Material {
-  id: number;
-  name: string;
-}
-
-const emptyForm = {
+  updated_at: string;
+  categories: { name: string } | null;
+  collections: { name: string } | null;
+  product_images: ProductImage[];
+  product_videos: ProductVideo[];
+};
+type Meta = {
+  categories: { id: number; name: string }[];
+  materials: { id: number; name: string }[];
+  subcategories: { id: number; name: string; category_id: number }[];
+  collections: { id: number; name: string; is_active: boolean }[];
+};
+const blank = {
   name: "",
   slug: "",
   description: "",
   price: 0,
   compare_price: null as number | null,
+  stock: 0,
+  sku: "",
   category_id: null as number | null,
   subcategory_id: null as number | null,
   collection_id: null as number | null,
   material_id: null as number | null,
-  stock: 0,
-  sku: "",
   sizes_available: "",
+  is_featured: false,
+  is_active: false,
   primary_image: "",
   image_alt: "",
-  video_type: "upload" as ProductVideo["video_type"],
-  video_title: "",
+  video_type: "upload",
   video_url: "",
+  video_title: "",
   video_poster: "",
-  is_featured: false,
-  is_active: true,
 };
-
-export default function ProductosAdmin() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [materials, setMaterials] = useState<Material[]>([]);
-  const [showModal, setShowModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [form, setForm] = useState(emptyForm);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-
-  const fetchProducts = async () => {
-    const { data } = await supabase
-      .from("products")
-      .select("*, categories(name), materials(name), product_images(id, url, alt_text, sort_order)")
-      .order("created_at", { ascending: false });
-
-    const baseProducts = (data || []) as Product[];
-    const ids = baseProducts.map((product) => product.id);
-
-    if (ids.length === 0) {
-      setProducts(baseProducts);
-      return;
-    }
-
-    const { data: videos } = await supabase
-      .from("product_videos")
-      .select("id, product_id, video_type, title, url, poster_url, sort_order, is_active")
-      .in("product_id", ids)
-      .order("sort_order", { ascending: true });
-
-    const videosByProduct = new Map<string, ProductVideo[]>();
-    ((videos || []) as ProductVideo[]).forEach((video) => {
-      if (!video.product_id) return;
-      const current = videosByProduct.get(video.product_id) || [];
-      videosByProduct.set(video.product_id, [...current, video]);
-    });
-
-    setProducts(
-      baseProducts.map((product) => ({
-        ...product,
-        product_videos: videosByProduct.get(product.id) || null,
-      }))
-    );
-  };
-
-  const fetchMeta = async () => {
-    const [catRes, matRes, subRes, collectionRes] = await Promise.all([
-      supabase.from("categories").select("id, name").order("sort_order"),
-      supabase.from("materials").select("id, name").order("sort_order"),
-      supabase.from("subcategories").select("id, category_id, slug, name").eq("is_active",true).order("sort_order"),
-      supabase.from("collections").select("id, name, slug, is_active").order("sort_order"),
-    ]);
-    setCategories(catRes.data || []);
-    setMaterials(matRes.data || []);
-    setSubcategories(subRes.data || []);
-    setCollections(collectionRes.data || []);
-  };
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      fetchProducts();
-      fetchMeta();
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  const openCreate = () => {
-    setEditingProduct(null);
-    setVideoFile(null);
-    setError("");
-    setForm(emptyForm);
-    setShowModal(true);
-  };
-
-  const openEdit = (product: Product) => {
-    const primaryImage =
-      product.product_images?.slice().sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))[0] ||
-      null;
-    const primaryVideo =
-      product.product_videos?.slice().sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))[0] ||
-      null;
-
-    setEditingProduct(product);
-    setVideoFile(null);
-    setError("");
-    setForm({
-      name: product.name,
-      slug: product.slug,
-      description: product.description || "",
-      price: Number(product.price),
-      compare_price: product.compare_price ? Number(product.compare_price) : null,
-      category_id: product.category_id,
-      subcategory_id: product.subcategory_id || null,
-      collection_id: product.collection_id || null,
-      material_id: product.material_id,
-      stock: product.stock,
-      sku: product.sku || "",
-      sizes_available: product.sizes_available?.join(", ") || "",
-      primary_image: primaryImage?.url || "",
-      image_alt: primaryImage?.alt_text || product.name,
-      video_type: primaryVideo?.video_type || "upload",
-      video_title: primaryVideo?.title || "",
-      video_url: primaryVideo?.url || "",
-      video_poster: primaryVideo?.poster_url || "",
-      is_featured: product.is_featured,
-      is_active: product.is_active,
-    });
-    setShowModal(true);
-  };
-
-  const savePrimaryImage = async (productId: string) => {
-    const imageUrl = form.primary_image.trim();
-    const existingImage = editingProduct?.product_images?.[0];
-
-    if (!imageUrl) {
-      if (existingImage?.id) {
-        const { error: imageError } = await supabase.from("product_images").delete().eq("id", existingImage.id);
-        if (imageError) throw new Error(imageError.message);
-      }
-      return;
-    }
-
-    const imagePayload = {
-      product_id: productId,
-      url: imageUrl,
-      alt_text: form.image_alt || form.name,
-      sort_order: 0,
-    };
-
-    if (existingImage?.id) {
-      const { error: imageError } = await supabase.from("product_images").update(imagePayload).eq("id", existingImage.id);
-      if (imageError) throw new Error(imageError.message);
-    } else {
-      const { error: imageError } = await supabase.from("product_images").insert(imagePayload);
-      if (imageError) throw new Error(imageError.message);
-    }
-  };
-
-  const uploadProductVideo = async (productId: string) => {
-    if (!videoFile) return "";
-    const cleanName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-    const filePath = `products/${productId}/${Date.now()}-${cleanName}`;
-    const { error: uploadError } = await supabase.storage
-      .from("product-videos")
-      .upload(filePath, videoFile, {
-        cacheControl: "3600",
-        upsert: true,
-      });
-
-    if (uploadError) throw new Error(uploadError.message);
-
-    const { data } = supabase.storage.from("product-videos").getPublicUrl(filePath);
-    return data.publicUrl;
-  };
-
-  const savePrimaryVideo = async (productId: string) => {
-    const uploadedUrl = await uploadProductVideo(productId);
-    const videoUrl = uploadedUrl || form.video_url.trim();
-    const existingVideo =
-      editingProduct?.product_videos?.slice().sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))[0] ||
-      null;
-
-    if (!videoUrl) {
-      if (existingVideo?.id) {
-        const { error: videoError } = await supabase.from("product_videos").delete().eq("id", existingVideo.id);
-        if (videoError) throw new Error(videoError.message);
-      }
-      return;
-    }
-
-    const videoPayload = {
-      product_id: productId,
-      video_type: uploadedUrl ? "upload" : form.video_type,
-      title: form.video_title.trim() || form.name,
-      url: videoUrl,
-      poster_url: form.video_poster.trim() || null,
-      sort_order: 0,
-      is_active: true,
-    };
-
-    if (existingVideo?.id) {
-      const { error: videoError } = await supabase.from("product_videos").update(videoPayload).eq("id", existingVideo.id);
-      if (videoError) throw new Error(videoError.message);
-    } else {
-      const { error: videoError } = await supabase.from("product_videos").insert(videoPayload);
-      if (videoError) throw new Error(videoError.message);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!form.name.trim() || !Number.isFinite(form.price) || form.price <= 0 || !Number.isInteger(form.stock) || form.stock < 0 || (form.compare_price !== null && form.compare_price <= form.price)) { setError("Revisa el nombre, el precio mayor a cero, el stock entero y el precio anterior mayor al actual."); return; }
-
-    setSaving(true);
-    setError("");
-
-    if (form.subcategory_id && !subcategories.some(item => item.id === form.subcategory_id && item.category_id === form.category_id)) { setError("La subcategoría debe pertenecer a la categoría seleccionada."); setSaving(false); return; }
-
-    const payload = {
-      name: form.name.trim(),
-      slug: form.slug.trim() || slugify(form.name),
-      description: form.description.trim() || null,
-      price: form.price,
-      compare_price: form.compare_price || null,
-      category_id: form.category_id,
-      subcategory_id: form.subcategory_id,
-      collection_id: form.collection_id,
-      material_id: form.material_id,
-      stock: form.stock,
-      sku: form.sku.trim() || null,
-      sizes_available: [...new Set(form.sizes_available.split(",").map(size => size.trim()).filter(Boolean))],
-      is_featured: form.is_featured,
-      is_active: form.is_active,
-    };
-
-    const response = editingProduct
-      ? await supabase.from("products").update(payload).eq("id", editingProduct.id).select("id").single()
-      : await supabase.from("products").insert(payload).select("id").single();
-
-    if (response.error || !response.data) {
-      setError(response.error?.message || "No se pudo guardar el producto.");
-      setSaving(false);
-      return;
-    }
-
+export default function Products() {
+  const [rows, setRows] = useState<Product[]>([]),
+    [total, setTotal] = useState<number | null>(null),
+    [page, setPage] = useState(0),
+    [q, setQ] = useState(""),
+    [query, setQuery] = useState(""),
+    [active, setActive] = useState(""),
+    [category, setCategory] = useState(""),
+    [sort, setSort] = useState("updated"),
+    [stock, setStock] = useState("");
+  const [meta, setMeta] = useState<Meta | null>(null),
+    [error, setError] = useState(""),
+    [warning, setWarning] = useState(""),
+    [notice, setNotice] = useState(""),
+    [loading, setLoading] = useState(true),
+    [saving, setSaving] = useState(false),
+    [editor, setEditor] = useState(false),
+    [editing, setEditing] = useState<Product | null>(null),
+    [form, setForm] = useState(blank),
+    [initial, setInitial] = useState(JSON.stringify(blank)),
+    [fields, setFields] = useState<Record<string, string>>({}),
+    [videoFile, setVideoFile] = useState<File | null>(null);
+  const generation = useRef(0);
+  const dirty = editor && (JSON.stringify(form) !== initial || !!videoFile);
+  useDirtyGuard(dirty);
+  const load = useCallback(async () => {
+    const version = ++generation.current;
+    setLoading(true);
     try {
-      if (!editingProduct) setEditingProduct({ ...payload, id: response.data.id });
-      await savePrimaryImage(response.data.id);
-      await savePrimaryVideo(response.data.id);
-      setSaving(false);
-      setShowModal(false);
-      fetchProducts();
-    } catch (saveError) {
-      const { data: savedProduct } = await supabase.from("products").select("*, product_images(id, url, alt_text, sort_order)").eq("id", response.data.id).maybeSingle();
-      if (savedProduct) {
-        const { data: savedVideos } = await supabase.from("product_videos").select("*").eq("product_id", response.data.id).order("sort_order");
-        setEditingProduct({ ...savedProduct, product_videos: savedVideos || [] } as Product);
+      const result = await adminApi<{
+        rows: Product[];
+        total: number;
+        videoError: string;
+      }>(
+        "/api/admin/catalogo/productos?" +
+          new URLSearchParams({
+            page: String(page),
+            q: query,
+            active,
+            category,
+            sort,
+            stock,
+          }),
+      );
+      if (version !== generation.current) return;
+      setRows(result.rows);
+      setTotal(result.total);
+      setWarning(result.videoError);
+      setError("");
+    } catch (e) {
+      if (version === generation.current) {
+        setError((e as Error).message);
+        setTotal(null);
       }
-      setError(`La pieza se guardó, pero falta completar sus archivos. ${saveError instanceof Error ? saveError.message : "Revisa la imagen o el video."} Puedes reintentar sin crear otra pieza.`);
+    } finally {
+      if (version === generation.current) setLoading(false);
+    }
+  }, [page, query, active, category, sort, stock]);
+  useEffect(() => {
+    const timer = setTimeout(() => void load(), 200);
+    return () => clearTimeout(timer);
+  }, [load]);
+  useEffect(() => {
+    let valid = true;
+    adminApi<Meta>("/api/admin/settings")
+      .then((data) => {
+        if (valid) setMeta(data);
+      })
+      .catch((e) => {
+        if (valid) setWarning("Clasificación no disponible: " + e.message);
+      });
+    const p = new URLSearchParams(window.location.search);
+    const timer = setTimeout(() => {
+      if (p.get("nuevo")) setEditor(true);
+      setStock(p.get("stock") || "");
+    }, 0);
+    return () => {
+      valid = false;
+      clearTimeout(timer);
+    };
+  }, []);
+  function change<K extends keyof typeof blank>(
+    key: K,
+    value: (typeof blank)[K],
+  ) {
+    setForm((old) => ({ ...old, [key]: value }));
+    setFields((old) => ({ ...old, [key]: "" }));
+    setNotice("");
+  }
+  function open(product?: Product) {
+    const image = product?.product_images
+        ?.slice()
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))[0],
+      video = product?.product_videos
+        ?.slice()
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))[0];
+    const next = product
+      ? {
+          ...blank,
+          ...product,
+          description: product.description || "",
+          sku: product.sku || "",
+          price: Number(product.price),
+          compare_price:
+            product.compare_price === null
+              ? null
+              : Number(product.compare_price),
+          sizes_available: product.sizes_available?.join(", ") || "",
+          primary_image: image?.url || "",
+          image_alt: image?.alt_text || "",
+          video_type: video?.video_type || "upload",
+          video_url: video?.url || "",
+          video_title: video?.title || "",
+          video_poster: video?.poster_url || "",
+        }
+      : blank;
+    setForm(next);
+    setInitial(JSON.stringify(next));
+    setEditing(product || null);
+    setEditor(true);
+    setVideoFile(null);
+    setError("");
+    setFields({});
+    window.scrollTo({ top: 0 });
+  }
+  function close() {
+    if (saving) return;
+    if (dirty && !confirm("¿Descartar los cambios sin guardar de esta pieza?"))
+      return;
+    setEditor(false);
+    setVideoFile(null);
+    setError("");
+  }
+  async function save(event: React.FormEvent) {
+    event.preventDefault();
+    setError("");
+    setFields({});
+    let uploadedPath = "";
+    try {
+      validateProduct({ ...form, ...(videoFile ? { video_url: "" } : {}) });
+      if (
+        videoFile &&
+        (!["video/mp4", "video/webm", "video/quicktime"].includes(
+          videoFile.type,
+        ) ||
+          videoFile.size > 100 * 1024 * 1024)
+      )
+        throw new Error("Usa MP4, WebM o MOV de hasta 100 MB.");
+      setSaving(true);
+      if (form.is_active) await verifyPreviewImage(form.primary_image);
+      let payload = { ...form };
+      if (videoFile) {
+        uploadedPath = `products/${editing?.id || crypto.randomUUID()}/${crypto.randomUUID()}-${videoFile.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+        const result = await supabase.storage
+          .from("product-videos")
+          .upload(uploadedPath, videoFile, { upsert: false });
+        if (result.error)
+          throw new Error(
+            "No se pudo subir el archivo. Verifica la migración 001 y el bucket.",
+          );
+        const { data } = supabase.storage
+          .from("product-videos")
+          .getPublicUrl(uploadedPath);
+        payload = {
+          ...payload,
+          video_url: data.publicUrl,
+          video_type: "upload",
+        };
+      }
+      await adminApi("/api/admin/catalogo/productos", {
+        id: editing?.id || null,
+        expected: editing?.updated_at || null,
+        data: payload,
+      });
+      setEditor(false);
+      setVideoFile(null);
+      setNotice("Pieza y archivos guardados correctamente.");
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+      setFields(
+        (e as Error & { fields?: Record<string, string> }).fields || {},
+      );
+      if (uploadedPath) {
+        const cleanup = await supabase.storage
+          .from("product-videos")
+          .remove([uploadedPath]);
+        if (cleanup.error)
+          setError(
+            (e as Error).message +
+              " El video subido quedó pendiente de limpieza en el bucket.",
+          );
+      }
+    } finally {
       setSaving(false);
     }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Seguro que quieres eliminar este producto?")) return;
-    const { error: deleteError } = await supabase.from("products").delete().eq("id", id);
-    if (deleteError) { setError("No se pudo eliminar el producto. Revisa tus permisos."); return; }
-    fetchProducts();
-  };
-
+  }
+  async function remove(product: Product) {
+    if (
+      !confirm(
+        `¿Eliminar «${product.name}» y sus referencias multimedia? Esta acción no se puede deshacer.`,
+      )
+    )
+      return;
+    setSaving(true);
+    try {
+      await adminApi(
+        "/api/admin/catalogo/productos",
+        { id: product.id },
+        "DELETE",
+      );
+      setNotice("Producto eliminado.");
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+  const input = (
+    key: keyof typeof blank,
+    label: string,
+    type = "text",
+    help?: string,
+  ) => (
+    <Field label={label} help={help} error={fields[key]}>
+      {(id) => (
+        <input
+          id={id}
+          type={type}
+          value={String(form[key] ?? "")}
+          aria-invalid={Boolean(fields[key])}
+          onChange={(e) =>
+            change(
+              key,
+              (type === "number"
+                ? e.target.value === "" && key === "compare_price"
+                  ? null
+                  : Number(e.target.value)
+                : e.target.value) as never,
+            )
+          }
+          step={key === "stock" ? 1 : type === "number" ? ".01" : undefined}
+          min={type === "number" ? 0 : undefined}
+        />
+      )}
+    </Field>
+  );
+  if (editor)
+    return (
+      <div className={s.editor}>
+        <div className={s.toolbar}>
+          <div>
+            <p className={s.eyebrow}>
+              {editing ? "Edición de catálogo" : "Nueva joya"}
+            </p>
+            <h2 className={s.contentTitle}>
+              {editing?.name || "Da forma a tu próxima pieza."}
+            </h2>
+          </div>
+          <button className={s.secondary} onClick={close} disabled={saving}>
+            <ArrowLeft size={16} />
+            Volver al catálogo
+          </button>
+        </div>
+        {error && <Notice tone="error">{error}</Notice>}
+        {warning && <Notice>{warning}</Notice>}
+        <form onSubmit={save}>
+          <div className={s.editorColumns}>
+            <div>
+              <Section title="01 · Información general">
+                <div className={s.grid}>
+                  <Field label="Nombre de la pieza" error={fields.name}>
+                    {(id) => (
+                      <input
+                        id={id}
+                        value={form.name}
+                        maxLength={150}
+                        aria-invalid={Boolean(fields.name)}
+                        onChange={(e) => {
+                          change("name", e.target.value);
+                          if (!editing) change("slug", slugify(e.target.value));
+                        }}
+                      />
+                    )}
+                  </Field>
+                  {input("slug", "Dirección URL")}
+                </div>
+                <Field
+                  label="Descripción de la pieza"
+                  help="Confirma composición, pureza, piedras, acabado, medidas y cuidados. No publiques garantías o certificaciones sin respaldo."
+                  error={fields.description}
+                >
+                  {(id) => (
+                    <textarea
+                      id={id}
+                      value={form.description}
+                      maxLength={6000}
+                      rows={5}
+                      onChange={(e) => change("description", e.target.value)}
+                    />
+                  )}
+                </Field>
+              </Section>
+              <Section title="02 · Precio y datos comerciales">
+                <div className={s.grid}>
+                  {input("price", "Precio (S/)", "number")}
+                  {input(
+                    "compare_price",
+                    "Precio anterior (S/)",
+                    "number",
+                    "Opcional. Debe superar al precio actual y corresponder a una promoción real.",
+                  )}
+                </div>
+              </Section>
+              <Section title="03 · Material, características e inventario">
+                <div className={s.grid}>
+                  <Field label="Material confirmado" error={fields.material_id}>
+                    {(id) => (
+                      <select
+                        id={id}
+                        value={form.material_id || ""}
+                        onChange={(e) =>
+                          change(
+                            "material_id",
+                            e.target.value ? Number(e.target.value) : null,
+                          )
+                        }
+                      >
+                        <option value="">Selecciona un material</option>
+                        {meta?.materials.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </Field>
+                  {input(
+                    "sizes_available",
+                    "Tallas disponibles",
+                    "text",
+                    "Separa las tallas por comas. Deja vacío si no aplica.",
+                  )}
+                  {input("stock", "Unidades disponibles", "number")}
+                  {input(
+                    "sku",
+                    "SKU",
+                    "text",
+                    "Código interno único, opcional.",
+                  )}
+                </div>
+              </Section>
+              <Section
+                title="04 · Fotografías y multimedia"
+                description="Edita la imagen principal. Las fotografías secundarias existentes se conservan sin reordenarlas."
+              >
+                {input(
+                  "primary_image",
+                  "URL de imagen principal",
+                  "text",
+                  "HTTPS o archivo de /images/. Usa la fotografía del producto vendido.",
+                )}
+                {input("image_alt", "Descripción accesible de la imagen")}
+                <details>
+                  <summary className={s.secondary}>
+                    Video de la pieza · opcional
+                  </summary>
+                  <div style={{ marginTop: 16 }}>
+                    <div className={s.grid}>
+                      <Field label="Proveedor de video">
+                        {(id) => (
+                          <select
+                            id={id}
+                            value={form.video_type}
+                            onChange={(e) =>
+                              change("video_type", e.target.value)
+                            }
+                          >
+                            <option value="upload">Archivo subido</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="tiktok">TikTok</option>
+                            <option value="external">
+                              Archivo HTTPS externo
+                            </option>
+                          </select>
+                        )}
+                      </Field>
+                      {input("video_title", "Título del video")}
+                    </div>
+                    {form.video_type === "upload" && (
+                      <Field
+                        label="Subir archivo"
+                        help="MP4, WebM o MOV · máximo 100 MB. Requiere el bucket del SQL 001."
+                      >
+                        {(id) => (
+                          <input
+                            id={id}
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime"
+                            onChange={(e) =>
+                              setVideoFile(e.target.files?.[0] || null)
+                            }
+                          />
+                        )}
+                      </Field>
+                    )}
+                    {input(
+                      "video_url",
+                      "Enlace del video",
+                      "text",
+                      "Solo proveedores implementados o archivos directos. No se admiten páginas arbitrarias como iframe.",
+                    )}
+                    {input("video_poster", "Imagen previa del video")}
+                  </div>
+                </details>
+              </Section>
+              <Section title="05 · Colecciones y clasificación">
+                <div className={s.grid}>
+                  <Field label="Categoría">
+                    {(id) => (
+                      <select
+                        id={id}
+                        value={form.category_id || ""}
+                        onChange={(e) => {
+                          change(
+                            "category_id",
+                            e.target.value ? Number(e.target.value) : null,
+                          );
+                          change("subcategory_id", null);
+                        }}
+                      >
+                        <option value="">Sin categoría</option>
+                        {meta?.categories.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </Field>
+                  <Field label="Subcategoría">
+                    {(id) => (
+                      <select
+                        id={id}
+                        disabled={!form.category_id}
+                        value={form.subcategory_id || ""}
+                        onChange={(e) =>
+                          change(
+                            "subcategory_id",
+                            e.target.value ? Number(e.target.value) : null,
+                          )
+                        }
+                      >
+                        <option value="">Sin subcategoría</option>
+                        {meta?.subcategories
+                          .filter((c) => c.category_id === form.category_id)
+                          .map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}
+                            </option>
+                          ))}
+                      </select>
+                    )}
+                  </Field>
+                  <Field label="Colección">
+                    {(id) => (
+                      <select
+                        id={id}
+                        value={form.collection_id || ""}
+                        onChange={(e) =>
+                          change(
+                            "collection_id",
+                            e.target.value ? Number(e.target.value) : null,
+                          )
+                        }
+                      >
+                        <option value="">Sin colección</option>
+                        {meta?.collections.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                            {!c.is_active ? " · inactiva" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </Field>
+                </div>
+              </Section>
+            </div>
+            <aside className={s.preview}>
+              <p className={s.eyebrow}>Vista previa de catálogo</p>
+              <div className={s.previewImage}>
+                {form.primary_image && (
+                  <Image
+                    src={form.primary_image}
+                    alt={form.image_alt || "Vista previa"}
+                    fill
+                    sizes="400px"
+                  />
+                )}
+              </div>
+              <h3>{form.name || "Nombre de la pieza"}</h3>
+              <p>
+                S/ {Number(form.price).toFixed(2)} · {form.stock} unidades
+              </p>
+              <p>
+                {form.description ||
+                  "Completa la información confirmada de esta joya."}
+              </p>
+              <Section title="06 · Publicación">
+                <Field label="Visibilidad" error={fields.is_active}>
+                  {(id) => (
+                    <select
+                      id={id}
+                      value={form.is_active ? "true" : "false"}
+                      onChange={(e) =>
+                        change("is_active", e.target.value === "true")
+                      }
+                    >
+                      <option value="false">Borrador · oculto</option>
+                      <option value="true">Publicado en tienda</option>
+                    </select>
+                  )}
+                </Field>
+                <label className={s.check}>
+                  <input
+                    type="checkbox"
+                    checked={form.is_featured}
+                    onChange={(e) => change("is_featured", e.target.checked)}
+                  />
+                  Destacar en inicio
+                </label>
+                <p className={s.help}>
+                  Publicar requiere precio, descripción, material, imagen y
+                  texto accesible válidos.
+                </p>
+              </Section>
+            </aside>
+          </div>
+          <div className={s.saveBar}>
+            <span>
+              {dirty
+                ? "Cambios sin guardar"
+                : "Revisa la pieza antes de guardar."}
+            </span>
+            <div className={s.actions}>
+              <button
+                className={s.secondary}
+                type="button"
+                onClick={close}
+                disabled={saving}
+              >
+                Cancelar
+              </button>
+              <button
+                className={s.primary}
+                type="submit"
+                disabled={saving || !meta}
+              >
+                {saving ? "Guardando…" : "Guardar producto"}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    );
   return (
     <>
-      {error && !showModal && <p className={styles.formError} role="alert">{error}</p>}
-      <div className={styles.toolbar}>
-        <p className={styles.helperText}>
-          Gestiona catálogo, precios, stock, visibilidad, imagen principal y video de cada pieza.
+      <div className={s.toolbar}>
+        <p className={s.help}>
+          Piezas reales, información precisa y publicación bajo tu control.
         </p>
-        <button className={styles.addButton} onClick={openCreate} type="button">
-          Nuevo producto
+        <button className={s.primary} onClick={() => open()}>
+          <Plus size={16} />
+          Añadir producto
         </button>
       </div>
-
-      {products.length === 0 ? (
-        <div className={styles.emptyState}>No hay productos. Añade el primero desde el botón superior.</div>
-      ) : (
-        <div className={styles.tableWrap} role="region" aria-label="Listado de productos" tabIndex={0}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Imagen</th>
-                <th>Nombre</th>
-                <th>Categoría</th>
-                <th>Material</th>
-                <th>Precio</th>
-                <th>Stock</th>
-                <th>Video</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => {
-                const imageUrl = product.product_images?.[0]?.url;
-                const video = product.product_videos?.[0];
-                return (
-                  <tr key={product.id}>
+      {error && <Notice tone="error">{error}</Notice>}
+      {notice && <Notice tone="success">{notice}</Notice>}
+      {warning && <Notice>{warning}</Notice>}
+      <div className={s.filters}>
+        <Field label="Buscar por nombre">
+          {(id) => (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setQuery(q);
+                setPage(0);
+              }}
+              className={s.actions}
+            >
+              <input
+                id={id}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Busca una joya"
+                style={{ flex: 1, width: 0 }}
+              />
+              <button className={s.iconButton} aria-label="Buscar productos">
+                <Search size={16} />
+              </button>
+            </form>
+          )}
+        </Field>
+        <Field label="Publicación">
+          {(id) => (
+            <select
+              id={id}
+              value={active}
+              onChange={(e) => {
+                setActive(e.target.value);
+                setPage(0);
+              }}
+            >
+              <option value="">Todos los estados</option>
+              <option value="true">Publicados</option>
+              <option value="false">Borradores</option>
+            </select>
+          )}
+        </Field>
+        <Field label="Categoría">
+          {(id) => (
+            <select
+              id={id}
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setPage(0);
+              }}
+            >
+              <option value="">Todas</option>
+              {meta?.categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </Field>
+        <Field label="Ordenar">
+          {(id) => (
+            <select
+              id={id}
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value);
+                setPage(0);
+              }}
+            >
+              <option value="updated">Última actualización</option>
+              <option value="name">Nombre A–Z</option>
+              <option value="price">Precio ascendente</option>
+            </select>
+          )}
+        </Field>
+      </div>
+      {stock && (
+        <div className={s.toolbar}>
+          <p className={s.help}>
+            Filtro de atención:{" "}
+            {stock === "empty"
+              ? "Agotados"
+              : stock === "low"
+                ? "Stock bajo"
+                : "Sin fotografía"}
+          </p>
+          <button
+            className={s.secondary}
+            onClick={() => {
+              setStock("");
+              setPage(0);
+            }}
+          >
+            Quitar filtro
+          </button>
+        </div>
+      )}
+      {loading ? (
+        <Loading />
+      ) : total !== null && rows.length === 0 ? (
+        <Empty
+          title={
+            query || active || category || stock
+              ? "No hay coincidencias"
+              : "Añade tu primera joya."
+          }
+          action={
+            <button className={s.primary} onClick={() => open()}>
+              Añadir mi primera joya
+            </button>
+          }
+        >
+          {query || active || category || stock
+            ? "Prueba con otro nombre o ajusta los filtros."
+            : "Carga sus datos y fotografías, confirma precio y stock, y guárdala como borrador hasta que esté lista."}
+        </Empty>
+      ) : rows.length > 0 ? (
+        <>
+          <div
+            className={s.tableWrap}
+            role="region"
+            aria-label="Catálogo de productos"
+            tabIndex={0}
+          >
+            <table className={s.table}>
+              <thead>
+                <tr>
+                  {[
+                    "Pieza",
+                    "Colección",
+                    "Categoría",
+                    "Precio",
+                    "Stock",
+                    "Estado",
+                    "Actualización",
+                    "Acciones",
+                  ].map((h) => (
+                    <th key={h} scope="col">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((p) => (
+                  <tr key={p.id}>
                     <td>
-                      {imageUrl ? (
-                        <div className={styles.thumbnailBox}>
-                          <Image src={imageUrl} alt={product.name} fill className={styles.thumbnailImage} sizes="60px" />
+                      <div className={s.nameCell}>
+                        <div className={s.thumb}>
+                          {p.product_images?.[0] && (
+                            <Image
+                              src={p.product_images[0].url}
+                              alt={p.name}
+                              fill
+                              sizes="60px"
+                            />
+                          )}
                         </div>
-                      ) : (
-                        <span className={styles.muted}>Sin imagen</span>
-                      )}
+                        <div>
+                          <strong>{p.name}</strong>
+                          <small>{p.sku || "Sin SKU"}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{p.collections?.name || "Sin colección"}</td>
+                    <td>{p.categories?.name || "Sin categoría"}</td>
+                    <td>S/ {Number(p.price).toFixed(2)}</td>
+                    <td>
+                      {p.stock}
+                      <small>
+                        {p.stock === 0
+                          ? "Agotado"
+                          : p.stock <= 3
+                            ? "Stock bajo"
+                            : ""}
+                      </small>
                     </td>
                     <td>
-                      <strong className={styles.rowTitle}>{product.name}</strong>
-                      {product.is_featured && <span className={styles.featuredLabel}>Destacado</span>}
-                    </td>
-                    <td>{product.categories?.name || "Sin categoría"}</td>
-                    <td>{product.materials?.name || "Sin material"}</td>
-                    <td className={styles.priceCell}>S/ {Number(product.price).toFixed(2)}</td>
-                    <td>{product.stock}</td>
-                    <td>
-                      {video ? (
-                        <span className={styles.mediaBadge}>{getVideoPlatformLabel(video.video_type)}</span>
-                      ) : (
-                        <span className={styles.muted}>Sin video</span>
-                      )}
+                      <Status active={p.is_active}>
+                        {p.is_active ? "Publicado" : "Borrador"}
+                      </Status>
                     </td>
                     <td>
-                      <span className={product.is_active ? styles.badgeActive : styles.badgeInactive}>
-                        {product.is_active ? "Publicado" : "Oculto"}
-                      </span>
+                      {p.updated_at
+                        ? new Date(p.updated_at).toLocaleDateString("es-PE", {
+                            timeZone: "America/Lima",
+                          })
+                        : "No disponible"}
                     </td>
                     <td>
-                      <div className={styles.actionGroup}>
-                        <button className={styles.editBtn} onClick={() => openEdit(product)} type="button">
+                      <div className={s.actions}>
+                        <button className={s.secondary} onClick={() => open(p)}>
                           Editar
                         </button>
-                        <button className={styles.deleteBtn} onClick={() => handleDelete(product.id)} type="button">
+                        <button
+                          className={s.danger}
+                          disabled={saving}
+                          onClick={() => remove(p)}
+                        >
                           Eliminar
                         </button>
                       </div>
                     </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {showModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
-          <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
-            <h2 className={styles.modalTitle}>{editingProduct ? "Editar producto" : "Nuevo producto"}</h2>
-            {error && <div className={styles.formError}>{error}</div>}
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Nombre</label>
-                <input
-                  className={styles.formInput}
-                  value={form.name}
-                  onChange={(event) =>
-                    setForm({
-                      ...form,
-                      name: event.target.value,
-                      slug: editingProduct ? form.slug : slugify(event.target.value),
-                      image_alt: form.image_alt || event.target.value,
-                    })
-                  }
-                  placeholder="Ej: Anillo Solitario Diamante"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Slug URL</label>
-                <input
-                  className={styles.formInput}
-                  value={form.slug}
-                  onChange={(event) => setForm({ ...form, slug: slugify(event.target.value) })}
-                  placeholder="anillo-solitario-diamante"
-                />
-              </div>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Descripción</label>
-              <textarea
-                className={styles.formTextarea}
-                value={form.description}
-                onChange={(event) => setForm({ ...form, description: event.target.value })}
-                placeholder="Describe materiales, acabado, ocasión y cuidados."
-              />
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel} htmlFor="product-category">Categoría</label>
-                <select
-                  id="product-category"
-                  className={styles.formSelect}
-                  value={form.category_id || ""}
-                  onChange={(event) =>
-                    setForm({ ...form, category_id: event.target.value ? Number(event.target.value) : null, subcategory_id:null })
-                  }
-                >
-                  <option value="">Seleccionar</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>{category.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Material</label>
-                <select
-                  className={styles.formSelect}
-                  value={form.material_id || ""}
-                  onChange={(event) =>
-                    setForm({ ...form, material_id: event.target.value ? Number(event.target.value) : null })
-                  }
-                >
-                  <option value="">Seleccionar</option>
-                  {materials.map((material) => (
-                    <option key={material.id} value={material.id}>{material.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}><label className={styles.formLabel} htmlFor="product-subcategory">Subcategoría</label><select id="product-subcategory" className={styles.formSelect} disabled={!form.category_id} value={form.subcategory_id || ""} onChange={event => setForm({...form,subcategory_id:event.target.value ? Number(event.target.value) : null})}><option value="">Sin subcategoría</option>{subcategories.filter(item => item.category_id === form.category_id).map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select><small className={styles.helperText}>Solo se muestran los estilos de esta categoría.</small></div>
-              <div className={styles.formGroup}><label className={styles.formLabel} htmlFor="product-collection">Colección</label><select id="product-collection" className={styles.formSelect} value={form.collection_id || ""} onChange={event => setForm({...form,collection_id:event.target.value ? Number(event.target.value) : null})}><option value="">Sin colección</option>{collections.map(item => <option key={item.id} value={item.id}>{item.name}{item.is_active === false ? " (inactiva)" : ""}</option>)}</select><small className={styles.helperText}>Una pieza publicada con imagen y colección activa puede elegirse en «Pieza exclusiva».</small></div>
-            </div>
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Precio (S/)</label>
-                <input
-                  className={styles.formInput}
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={form.price}
-                  onChange={(event) => setForm({ ...form, price: Number(event.target.value) || 0 })}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Precio anterior</label>
-                <input
-                  className={styles.formInput}
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={form.compare_price || ""}
-                  onChange={(event) =>
-                    setForm({ ...form, compare_price: event.target.value ? Number(event.target.value) : null })
-                  }
-                  placeholder="Opcional"
-                />
-              </div>
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Stock</label>
-                <input
-                  className={styles.formInput}
-                  type="number"
-                  min="0"
-                  value={form.stock}
-                  onChange={(event) => setForm({ ...form, stock: Number(event.target.value) || 0 })}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>SKU</label>
-                <input
-                  className={styles.formInput}
-                  value={form.sku}
-                  onChange={(event) => setForm({ ...form, sku: event.target.value })}
-                  placeholder="KLQ-AN-001"
-                />
-              </div>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Imagen principal</label>
-              <input
-                className={styles.formInput}
-                value={form.primary_image}
-                onChange={(event) => setForm({ ...form, primary_image: event.target.value })}
-                placeholder="https://res.cloudinary.com/... o /images/product-1.png"
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel} htmlFor="product-sizes">Tallas disponibles</label>
-              <input id="product-sizes" className={styles.formInput} value={form.sizes_available} onChange={event => setForm({ ...form, sizes_available: event.target.value })} placeholder="Ej: 6, 7, 8. Dejar vacío si no requiere talla." />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Texto alternativo de imagen</label>
-              <input
-                className={styles.formInput}
-                value={form.image_alt}
-                onChange={(event) => setForm({ ...form, image_alt: event.target.value })}
-                placeholder="Describe la pieza para accesibilidad"
-              />
-            </div>
-
-            <div className={styles.formSection}>
-              <h3 className={styles.formSectionTitle}>Video del producto</h3>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Tipo de video</label>
-                  <select
-                    className={styles.formSelect}
-                    value={form.video_type}
-                    onChange={(event) =>
-                      setForm({ ...form, video_type: event.target.value as ProductVideo["video_type"] })
-                    }
-                  >
-                    <option value="upload">Archivo subido</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="tiktok">TikTok</option>
-                    <option value="external">URL externa</option>
-                  </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Título del video</label>
-                  <input
-                    className={styles.formInput}
-                    value={form.video_title}
-                    onChange={(event) => setForm({ ...form, video_title: event.target.value })}
-                    placeholder="Ej: Brillo y detalle de la pieza"
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Subir archivo</label>
-                <input
-                  className={styles.fileInput}
-                  type="file"
-                  accept="video/mp4,video/webm,video/quicktime"
-                  onChange={(event) => setVideoFile(event.target.files?.[0] || null)}
-                />
-                {videoFile && <span className={styles.inlineHint}>{videoFile.name}</span>}
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>URL de video</label>
-                <input
-                  className={styles.formInput}
-                  value={form.video_url}
-                  onChange={(event) => setForm({ ...form, video_url: event.target.value })}
-                  placeholder="https://www.instagram.com/reel/... o https://.../video.mp4"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Imagen previa del video</label>
-                <input
-                  className={styles.formInput}
-                  value={form.video_poster}
-                  onChange={(event) => setForm({ ...form, video_poster: event.target.value })}
-                  placeholder="Opcional: URL de portada"
-                />
-              </div>
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Destacado</label>
-                <select
-                  className={styles.formSelect}
-                  value={form.is_featured ? "true" : "false"}
-                  onChange={(event) => setForm({ ...form, is_featured: event.target.value === "true" })}
-                >
-                  <option value="false">No</option>
-                  <option value="true">Sí, mostrar en home</option>
-                </select>
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Estado</label>
-                <select
-                  className={styles.formSelect}
-                  value={form.is_active ? "true" : "false"}
-                  onChange={(event) => setForm({ ...form, is_active: event.target.value === "true" })}
-                >
-                  <option value="true">Publicado en tienda</option>
-                  <option value="false">Oculto en tienda</option>
-                </select>
-              </div>
-            </div>
-
-            <div className={styles.modalActions}>
-              <button className={styles.cancelBtn} onClick={() => setShowModal(false)} type="button">
-                Cancelar
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className={s.pagination}>
+            <span>
+              {total ?? "—"} piezas · página {page + 1}
+            </span>
+            <div className={s.actions}>
+              <button
+                className={s.secondary}
+                disabled={page === 0 || loading}
+                onClick={() => setPage(page - 1)}
+              >
+                Anterior
               </button>
-              <button className={styles.saveBtn} disabled={saving || !form.name} onClick={handleSave} type="button">
-                {saving ? "Guardando..." : "Guardar producto"}
+              <button
+                className={s.secondary}
+                disabled={total === null || (page + 1) * 20 >= total || loading}
+                onClick={() => setPage(page + 1)}
+              >
+                Siguiente
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </>
+      ) : null}
     </>
   );
 }

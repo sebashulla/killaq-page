@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import type { DocumentType, Profile } from "@/types/auth";
 import { supabase } from "@/utils/supabaseClient";
 import styles from "./page.module.css";
+import LegalLinks from "@/components/LegalLinks";
 
 const emptyProfile = {
   full_name: "",
@@ -274,6 +275,7 @@ export default function ProfilePage() {
                   {saving ? "Guardando..." : "Guardar datos"}
                 </button>
               </div>
+              <LegalLinks privacyOnly />
             </form>
           </section>
         ) : null}

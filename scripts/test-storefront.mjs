@@ -15,7 +15,7 @@ test('Exclusive section requires an explicitly selected published product, image
   const settings = normalizeStorefrontSettings({exclusive_enabled:true, exclusive_product_id:id});
   const product = {id, is_active:true, collection_id:3, collections:{is_active:true}, product_images:[{url:'real.jpg'}]};
   assert.equal(canShowExclusive(settings,product),true);
-  for (const invalid of [null, {...product,id:'other'}, {...product,is_active:false}, {...product,collection_id:null}, {...product,collections:{is_active:false}}, {...product,product_images:[]}]) assert.equal(canShowExclusive(settings,invalid),false);
+  for (const invalid of [null, {...product,id:'other'}, {...product,is_active:false}, {...product,collection_id:null}, {...product,collections:{is_active:false}}, {...product,product_images:[]}, {...product,sku:'KILLAQ-DEMO-QA'}]) assert.equal(canShowExclusive(settings,invalid),false);
   assert.equal(canShowExclusive({...settings,exclusive_enabled:false},product),false);
   assert.equal(normalizeStorefrontSettings({exclusive_product_id:'/fake'}).exclusive_product_id,'');
 });

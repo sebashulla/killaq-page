@@ -13,3 +13,7 @@ Los cinco archivos usan transacciones y se pueden volver a ejecutar. **No se eje
 Los archivos antiguos `killaq_schema.sql` y `killaq_architecture_additions.sql` se conservan como referencia. No vuelvas a ejecutar el esquema completo sobre la base existente. La migración complementaria antigua puede sobrescribir datos de contacto: usa las nuevas migraciones específicas para esta revisión.
 
 La política SQL no oculta un archivo cuya URL ya se conoce en un bucket público. Usa un bucket privado para cualquier material confidencial.
+
+6. `006_secure_complaints.sql`: después de 001–005, conserva la tabla del Libro, cierra los envíos directos públicos y habilita registro por backend, historial inmutable, cola de correo, calendario y avisos. Requiere configurar el servidor antes de habilitar el formulario. No se ejecutó remotamente. Aplicar después de revisar LEGAL_IMPLEMENTATION.md. Las hojas antiguas sin identidad o vencimiento requieren revisión manual; no se inventan datos históricos.
+
+7. `007_admin_operations.sql`: después de 001–006, agrega RPC administrativos con RLS y verificación de rol para guardar producto + imagen + video de forma atómica, fusionar únicamente la sección de configuración editada y ordenar campañas sin sobrescribir una lista obsoleta. Es idempotente; no crea tablas ni inserta piezas, no asigna administradores y no cambia las políticas existentes. Incluye control de ediciones simultáneas de productos y configuración. **No se ejecutó en Supabase remoto.** Revisar `ADMIN_2_IMPLEMENTATION.md` antes de copiarlo completo al SQL Editor.

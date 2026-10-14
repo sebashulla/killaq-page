@@ -1,0 +1,2 @@
+.links { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 18px 0; }
+.links a { display: inline-flex; min-height: 44px; align-items: center; color: var(--color-gold-text); font: 400 .78rem/1.65 var(--font-inter),sans-serif; text-decoration: underline; text-underline-offset: 4px; }

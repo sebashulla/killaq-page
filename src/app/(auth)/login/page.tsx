@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "@/utils/supabaseClient";
 import styles from "../auth.module.css";
+import LegalLinks from "@/components/LegalLinks";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -84,9 +85,11 @@ export default function LoginPage() {
             />
           </div>
 
+          <Link href="/recuperar-contrasena" className={styles.recoveryLink}>¿Olvidaste tu contraseña?</Link>
           <button type="submit" className={styles.submitButton} disabled={loading}>
             {loading ? "Ingresando..." : "Iniciar sesión"}
           </button>
+          <LegalLinks privacyOnly />
         </form>
 
         <div className={styles.footer}>

@@ -44,7 +44,7 @@ export default function Navbar() {
     router.push(`/colecciones?search=${encodeURIComponent(query.trim())}`);
     close();
   };
-  return <nav className={styles.navbar} ref={navRef} aria-label="Navegación principal">
+  return <nav className={styles.navbar} data-analytics-location='header' ref={navRef} aria-label="Navegación principal">
     <div className={styles.announcement}><span>Joyas para los momentos que importan</span><Link href="/atencion-personalizada" onClick={close}>Atención personalizada <ArrowUpRight size={12} /></Link></div>
     <div className={styles.topBar}>
       <button ref={menuToggleRef} type="button" className={styles.mobileToggle} aria-label={menu ? "Cerrar menú" : "Abrir menú"} aria-expanded={menu} aria-controls="main-navigation" onClick={() => { setMenu(!menu); setShop(false); setSearch(false); }}>{menu ? <X /> : <Menu />}</button>

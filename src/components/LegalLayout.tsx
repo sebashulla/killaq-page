@@ -1,0 +1,10 @@
+import Link from "next/link";
+import SiteChrome from "./SiteChrome";
+import styles from "./LegalLayout.module.css";
+export type LegalSection = { id: string; title: string; paragraphs: string[] };
+export default function LegalLayout({ title, intro, sections, draft = false, date = "2026-10-09", children }: { title: string; intro: string; sections: LegalSection[]; draft?: boolean; date?: string; children?: React.ReactNode }) {
+  return <SiteChrome><main className={styles.page}><header className={styles.header}><span className={styles.kicker}>KILLAQ · INFORMACIÓN Y CONFIANZA</span><h1>{title}</h1><p>{intro}</p><p className={styles.date}>Última revisión: <time dateTime={date}>{date.split("-").reverse().join("/")}</time>{draft && " · Borrador interno, sin entrada en vigor"}</p></header>
+    {draft && <p className={styles.notice} role="note">Vista local de revisión. Las condiciones pendientes requieren confirmación del responsable y revisión jurídica antes de publicarse.</p>}
+    <div className={styles.layout}><aside className={styles.index}><nav aria-label="Índice del documento"><h2>En esta página</h2><ol>{sections.map(section => <li key={section.id}><a href={`#${section.id}`}>{section.title}</a></li>)}</ol></nav></aside><article className={styles.document}>{sections.map((section,index) => <section className={styles.section} id={section.id} key={section.id} tabIndex={-1}><span className={styles.number}>{String(index+1).padStart(2,"0")}</span><h2>{section.title}</h2>{section.paragraphs.map((paragraph,i) => <p key={i}>{paragraph}</p>)}</section>)}{children}<nav className={styles.related} aria-label="Documentos relacionados"><span>Información relacionada</span><Link href="/terminos-y-condiciones">Términos y condiciones</Link><Link href="/cambios-y-devoluciones">Cambios, devoluciones y reembolsos</Link><Link href="/politica-de-privacidad">Política de privacidad</Link><Link href="/libro-reclamaciones">Libro de reclamaciones</Link></nav></article></div>
+  </main></SiteChrome>;
+}

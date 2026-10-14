@@ -9,13 +9,18 @@ import SiteChrome from "@/components/SiteChrome";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/utils/format";
 import styles from "./page.module.css";
+import LegalLinks from "@/components/LegalLinks";
+import {useAnalytics,refreshAnalyticsContext} from '@/components/analytics/AnalyticsProvider';
+import {trackOnce} from '@/lib/analytics/client';
 
 export default function CartPage() {
-  const { items, subtotal, updateQuantity, removeItem, clearCart, refreshItems } = useCart();
+  const { items, subtotal, updateQuantity, removeItem, clearCart, refreshItems,ready:cartReady } = useCart();
   const ids = [...new Set(items.map(item => item.id))].sort().join(",");
   const [verifiedIds, setVerifiedIds] = useState("");
   const [verificationError, setVerificationError] = useState(false);
   const [retry, setRetry] = useState(0);
+  const analyticsState=useAnalytics();
+  useEffect(()=>{refreshAnalyticsContext();if(cartReady&&verifiedIds===ids&&!verificationError){const products=[...new Set(items.map(item=>item.id))].map(id=>({productId:id,quantity:items.filter(item=>item.id===id).reduce((sum,item)=>sum+item.quantity,0)}));trackOnce('cart',{name:'view_cart',items:products});}},[analyticsState.active,analyticsState.navigation,verifiedIds,ids,verificationError,items,cartReady]);
   useEffect(() => {
     if (!ids) return;
     let active = true;
@@ -38,6 +43,7 @@ export default function CartPage() {
           <p>Revisa tus piezas seleccionadas antes de coordinar el pedido con Killaq.</p>
         </header>
 
+        <LegalLinks />
         {items.length === 0 ? (
           <section className={styles.empty}>
             <h2>Tu carrito está vacío</h2>
@@ -89,6 +95,8 @@ export default function CartPage() {
               {invalidStock && <p role="alert" className={styles.note}>Revisa las cantidades o retira las piezas sin disponibilidad para continuar.</p>}
               {!canCheckout && !invalidStock && !verificationError && <p role="status" className={styles.note}>Verificando precios y disponibilidad…</p>}
               {canCheckout && <a
+                data-analytics-location='cart'
+                data-analytics-products={JSON.stringify([...new Set(items.map(item=>item.id))].map(id=>({productId:id,quantity:items.filter(item=>item.id===id).reduce((sum,item)=>sum+item.quantity,0)})))}
                 className={styles.primaryButton}
                 target="_blank"
                 rel="noopener noreferrer"

@@ -159,6 +159,9 @@
   font-size: 0.85rem;
   text-align: center;
 }
+.authTitle { font-family: var(--font-playfair), serif; font-weight: 400; font-size: clamp(1.9rem, 5vw, 2.45rem); margin: 24px 0 12px; line-height: 1.15; }
+.help { font-size: .8rem; line-height: 1.7; color: var(--color-gray-medium); }
+.recoveryLink { justify-self: end; color: var(--color-gold-deep); text-decoration: underline; text-underline-offset: 4px; min-height: 44px; display: flex; align-items: center; font-size: .85rem; }
 @media (max-width: 560px) {
   .container { padding: 24px 6%; min-height: 100svh; }
   .card { padding: 30px 24px; }

@@ -1,0 +1,22 @@
+.page { padding: 70px 6% 90px; max-width: 1440px; margin: auto; color: var(--color-ink); }
+.header { max-width: 900px; padding-bottom: 35px; border-bottom: 1px solid var(--color-border); }
+.kicker { font-size: .68rem; letter-spacing: .18em; color: var(--color-gold-text); }
+.header h1 { font-size: clamp(2.6rem, 5vw, 4.7rem); font-weight: 400; line-height: 1.05; margin: 22px 0; }
+.header > p { font-size: 1rem; line-height: 1.8; max-width: 760px; }
+.header .date { font-size: .78rem; color: #666158; margin-top: 20px; }
+.layout { display: grid; grid-template-columns: 235px minmax(0, 1fr); gap: 60px; margin-top: 45px; max-width: 1160px; }
+.index h2 { font: 500 .75rem var(--font-inter), sans-serif; letter-spacing: .06em; margin-bottom: 15px; }
+.index ol { list-style: none; margin: 0; padding: 0; }
+.index a { display: block; font-size: .82rem; line-height: 1.6; padding: 8px 0; color: #605b52; }
+.index a:hover { color: var(--color-gold-text); text-decoration: underline; }
+.document { min-width: 0; }
+.section { scroll-margin-top: 150px; margin-bottom: 35px; outline-offset: 8px; }
+.number { font-size: .7rem; color: var(--color-gold-text); letter-spacing: .1em; }
+.section h2 { font-size: 1.9rem; line-height: 1.2; font-weight: 500; margin: 8px 0 17px; }
+.section p { font-size: .96rem; line-height: 1.95; margin-bottom: 16px; overflow-wrap: anywhere; }
+.notice { margin: 24px 0; max-width: 900px; padding: 18px 0 18px 22px; border-left: 2px solid var(--color-gold); color: #615338; font-size: .9rem; line-height: 1.8; }
+.related { border-top: 1px solid var(--color-border); padding-top: 25px; display: flex; flex-wrap: wrap; gap: 12px 25px; }
+.related > span { flex-basis: 100%; font-size: .73rem; color: var(--color-gold-text); text-transform: uppercase; letter-spacing: .09em; }
+.related a { display: inline-flex; min-height: 44px; align-items: center; font-size: .84rem; text-decoration: underline; text-underline-offset: 5px; }
+@media(max-width:900px) { .layout { grid-template-columns: 1fr; gap: 35px; } .index ol { columns: 2; column-gap: 25px; } .index li { break-inside: avoid; } .index a { min-height: 44px; } .page { padding-top: 45px; } }
+@media(max-width:500px) { .page { padding: 35px 6% 60px; } .header { padding-bottom: 23px; } .header h1 { font-size: 2.75rem; } .header > p { font-size: .92rem; } .index ol { columns: 1; } .layout { margin-top: 30px; } .section h2 { font-size: 1.75rem; } .section p { font-size: .92rem; line-height: 1.9; } .section { scroll-margin-top: 105px; } }

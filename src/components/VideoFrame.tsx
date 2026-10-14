@@ -1,7 +1,13 @@
 "use client";
 
+import Link from "next/link";
+import { useState } from "react";
 import type { ProductVideo, SocialVideo } from "@/types/catalog";
-import { getSocialEmbedSrc, getVideoPlatformLabel, isDirectVideoUrl } from "@/utils/video";
+import {
+  getSocialEmbedSrc,
+  getVideoPlatformLabel,
+  isDirectVideoUrl,
+} from "@/utils/video";
 import styles from "./VideoFrame.module.css";
 
 type VideoSource =
@@ -16,6 +22,7 @@ type VideoSource =
 interface VideoFrameProps {
   video: VideoSource;
   compact?: boolean;
+  mediaLabel?: "video" | "publicación";
 }
 
 function getSource(video: VideoSource) {
@@ -36,15 +43,43 @@ function getSource(video: VideoSource) {
   };
 }
 
-export default function VideoFrame({ video, compact = false }: VideoFrameProps) {
+export default function VideoFrame({
+  video,
+  compact = false,
+  mediaLabel = "video",
+}: VideoFrameProps) {
   const source = getSource(video);
   const embedSrc = getSocialEmbedSrc(source.url, source.platform);
-  const directVideo = source.platform === "upload" || isDirectVideoUrl(source.url);
+  const directVideo =
+    source.platform === "upload" || isDirectVideoUrl(source.url);
+  const [activated, setActivated] = useState<string | null>(null);
+  const external = source.platform !== "upload";
+  const allowed = !external || activated === source.url;
 
   return (
     <article className={compact ? styles.compactFrame : styles.frame}>
-      <div className={styles.media}>
-        {directVideo ? (
+      <div
+        className={`${styles.media} ${!allowed && compact ? styles.pendingCompact : ""}`}
+      >
+        {!allowed ? (
+          <div className={styles.activation}>
+            <p>
+              {mediaLabel === "publicación" ? "Esta publicación" : "Este video"}{" "}
+              se carga desde {getVideoPlatformLabel(source.platform)}. Al
+              activarlo, ese servicio puede recibir datos técnicos y utilizar
+              sus propias tecnologías.
+            </p>
+            <button type="button" onClick={() => setActivated(source.url)}>
+              Activar{" "}
+              {mediaLabel === "publicación"
+                ? "publicación externa"
+                : "video externo"}
+            </button>
+            <Link href="/politica-de-privacidad">
+              Información de privacidad
+            </Link>
+          </div>
+        ) : directVideo ? (
           <video
             className={styles.video}
             controls
@@ -64,7 +99,12 @@ export default function VideoFrame({ video, compact = false }: VideoFrameProps) 
             referrerPolicy="strict-origin-when-cross-origin"
           />
         ) : (
-          <a className={styles.linkFallback} href={source.url} target="_blank" rel="noreferrer">
+          <a
+            className={styles.linkFallback}
+            href={source.url}
+            target="_blank"
+            rel="noreferrer"
+          >
             Ver video
           </a>
         )}
@@ -72,6 +112,18 @@ export default function VideoFrame({ video, compact = false }: VideoFrameProps) 
       <div className={styles.caption}>
         <span>{getVideoPlatformLabel(source.platform)}</span>
         <strong>{source.title}</strong>
+        {external && allowed && (
+          <button
+            className={styles.stopExternal}
+            type="button"
+            onClick={() => setActivated(null)}
+          >
+            Cerrar{" "}
+            {mediaLabel === "publicación"
+              ? "publicación externa"
+              : "video externo"}
+          </button>
+        )}
       </div>
     </article>
   );

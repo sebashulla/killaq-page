@@ -47,8 +47,8 @@ export function normalizeStorefrontSettings(value: unknown): StorefrontSettings 
   };
 }
 
-export function canShowExclusive(settings: Pick<StorefrontSettings, "exclusive_enabled" | "exclusive_product_id">, product: { id: string; is_active?: boolean; collection_id?: number | null; collections?: { is_active?: boolean } | null; product_images?: { url: string }[] | null } | null) {
-  return Boolean(settings.exclusive_enabled && product && product.id === settings.exclusive_product_id && product.is_active === true && product.collection_id && product.collections?.is_active === true && product.product_images?.some(image => image.url?.trim()));
+export function canShowExclusive(settings: Pick<StorefrontSettings, "exclusive_enabled" | "exclusive_product_id">, product: { id: string; sku?: string | null; is_active?: boolean; collection_id?: number | null; collections?: { is_active?: boolean } | null; product_images?: { url: string }[] | null } | null) {
+  return Boolean(settings.exclusive_enabled && product && !product.sku?.startsWith("KILLAQ-DEMO-") && product.id === settings.exclusive_product_id && product.is_active === true && product.collection_id && product.collections?.is_active === true && product.product_images?.some(image => image.url?.trim()));
 }
 
 export type JewelryTone = "gold" | "silver";

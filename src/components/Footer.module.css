@@ -1,4 +1,10 @@
 .footer { background: var(--color-ink); color: #eee9da; }
+.legalRow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 45px; max-width: 1440px; padding: 0 4% 35px; margin: auto; }
+.bookAccess { display: flex; align-items: center; gap: 18px; border: 1px solid #d8c49b55; padding: 21px; color: #e9d4a5; align-self: start; font-size: .86rem; min-height: 70px; }
+.bookAccess span { flex: 1; }
+.bookAccess small { display: block; color: #cbc7bf; font-size: .74rem; line-height: 1.7; margin-top: 5px; }
+@media(max-width:900px) { .legalRow { padding-left: 6%; padding-right: 6%; gap: 28px; } }
+@media(max-width:500px) { .legalRow { grid-template-columns: 1fr; gap: 24px; } .bookAccess { padding: 18px; } }
 .brand > span > span { color: var(--color-gold-soft); }
 .content { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1.2fr; gap: 45px; max-width: 1440px; margin: auto; padding: 65px 4%; }
 .brand { display: flex; flex-direction: column; align-items: flex-start; gap: 23px; }

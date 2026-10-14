@@ -1,0 +1,114 @@
+.banner,
+.dialog {
+  background: #fffefa;
+  color: #282521;
+  border: 1px solid #dacebb;
+  padding: 24px;
+  box-shadow: 0 8px 28px #28252118;
+  width: min(610px, calc(100% - 32px));
+  font-family: var(--font-inter), sans-serif;
+  line-height: 1.75;
+  font-size: 0.82rem;
+}
+.banner {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 180;
+}
+.dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+}
+.dialog::backdrop {
+  background: #17161366;
+}
+.banner h2,
+.dialog h2 {
+  font:
+    500 1.8rem var(--font-playfair),
+    serif;
+  margin: 5px 0 10px;
+}
+.banner p,
+.dialog p {
+  margin: 8px 0;
+}
+.banner a,
+.dialog a {
+  text-decoration: underline;
+  color: #755620;
+}
+.eyebrow {
+  font-size: 0.64rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #755620;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.actions button {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #876629;
+  background: #fffefa;
+  color: #755620;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.actions button:disabled {
+  background: #ede7dd;
+  color: #62594d;
+}
+.access {
+  border: 0;
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 8px 0;
+  min-height: 44px;
+}
+.close {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: 0;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .banner,
+  .dialog {
+    padding: 18px;
+    font-size: 0.78rem;
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+  }
+  .banner h2,
+  .dialog h2 {
+    font-size: 1.5rem;
+  }
+  .actions {
+    flex-direction: column;
+  }
+}

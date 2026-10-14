@@ -1,5 +1,7 @@
 # Killaq Joyería Fina
 
+Recuperación de cuenta, redes y muestra digital: [informe y configuración](ACCOUNT_RECOVERY_SOCIAL.md). Pruebas aisladas: `npm run test:account` y `npm run test:account:ui`.
+
 Tienda en Next.js 16.4, React 19 y Supabase, con Motion para las animaciones. El proyecto conserva el catálogo y la administración existentes e incorpora la nueva dirección visual de marca.
 
 ## Desarrollo local
@@ -13,6 +15,8 @@ npm run dev -- --hostname 127.0.0.1
 
 Abrir http://localhost:3000. El servidor de desarrollo actualiza la vista al guardar archivos. La bienvenida puede repetirse con el botón «Ver bienvenida» de la portada.
 
+La implementación legal del 9 de octubre se documenta en [LEGAL_IMPLEMENTATION.md](LEGAL_IMPLEMENTATION.md). Los documentos completos son borradores locales hasta confirmar los datos y aprobarlos; el Libro necesita la migración 006 y configuración privada de servidor/correo. `npm run test:legal` ejecuta sus pruebas aisladas. La revisión comercial privada está en `private-legal/`, excluida de Git y Vercel.
+
 Configurar `.env.local` con `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`. No usar una clave de servicio en el frontend. Sin conexión no se inventan productos; la tienda muestra estados de carga, indisponibilidad o catálogo en preparación.
 
 ## Migraciones pendientes
@@ -24,8 +28,9 @@ Los archivos no se ejecutaron en el proyecto remoto. Copiar cada archivo complet
 3. `src/sql/003_restore_complaints_book.sql`.
 4. `src/sql/004_brand_and_storefront.sql`.
 5. `src/sql/005_categories_and_exclusive_showcase.sql`.
+6. `src/sql/006_secure_complaints.sql` (Libro por backend, historial, correo y calendario; revisar la configuración privada antes de habilitar).
 
-Las cinco migraciones son idempotentes, usan transacciones y se probaron en PostgreSQL local mediante PGlite. Ver `src/sql/README.md`. No volver a ejecutar el esquema base completo sobre la base existente.
+Las migraciones son idempotentes, usan transacciones y se probaron en PostgreSQL local mediante PGlite. Ver `src/sql/README.md`. No volver a ejecutar el esquema base completo sobre la base existente.
 
 ## Marca y atención personalizada
 
@@ -87,3 +92,17 @@ Capturas de la identidad dorada: `screenshots/killaq-preview-v3.jpg`, `screensho
 - La auditoría de dependencias de producción quedó sin vulnerabilidades reportadas. Persisten cinco avisos altos transitivos en la cadena de ESLint (`braces` / `micromatch` / `fast-glob`); `npm audit` no ofrece una corrección compatible. No se forzó un downgrade de Next.js.
 
 La dirección visual, el archivo del anillo y su prompt están documentados en `BRAND_IDENTITY.md`.
+
+## Administración 2.0
+
+La revisión local del panel está documentada en `ADMIN_2_IMPLEMENTATION.md`, con capturas, pruebas, alcance y bloqueos operativos. Conserva el diseño de la tienda pública. `npm test` incluye las pruebas de autorización, RLS y operaciones atómicas de Admin 2.0; `npm run test:admin` las ejecuta por separado. Las pruebas de navegador usan exclusivamente una aplicación y fixture local aislados.
+
+**Nuevo SQL pendiente: `src/sql/007_admin_operations.sql`**, después de 001–006. Agrega guardado atómico de producto/multimedia, fusión de configuración y orden de campañas. No se ejecutó remotamente. Los guardados que lo requieren informan el bloqueo hasta su aplicación. El panel no crea ni presupone una cuenta administrativa; se necesita un usuario Supabase autorizado.
+
+## Estadísticas comerciales
+
+`/admin/estadisticas` integra el módulo de interés comercial y consultas, con periodos, productos, recorrido, canales, dispositivos y búsquedas protegidas. Arquitectura, definiciones, investigación, privacidad y resultados: `ANALYTICS_IMPLEMENTATION.md`.
+
+La captura con PostHog permanece apagada hasta completar credenciales, región, política y aprobaciones; no hay métricas ficticias, ventas inferidas de WhatsApp, SDK de replay o captura duplicada en Supabase. `.env.example` describe las variables de servidor. Esta revisión no necesita SQL nuevo.
+
+`npm run test:analytics` usa transporte totalmente interceptado. Las pruebas de navegador requieren la aplicación y Supabase fixture aislados en 3001/3100; `npm run test:analytics:ui` nunca debe apuntar al sitio de producción. `scripts/test-analytics-coverage.mjs` revisa el primer día medido y la ausencia de cobertura después de ejecutar la suite de analítica para preparar los módulos de prueba.

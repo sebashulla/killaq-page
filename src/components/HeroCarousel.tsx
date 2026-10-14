@@ -11,12 +11,14 @@ import { isLegacyCampaign, resolveHeroBackground } from "@/utils/storefront";
 import { useStorefrontSettings } from "@/context/StorefrontContext";
 import type { HeroSlide } from "@/types/catalog";
 import styles from "./HeroCarousel.module.css";
+import {useImpression} from './analytics/AnalyticsProvider';
 
 export default function HeroCarousel() {
   const [slides, setSlides] = useState<HeroSlide[]>(fallbackSlides);
   const [current, setCurrent] = useState(0);
   const [playing, setPlaying] = useState<boolean | null>(null);
   const [hovered, setHovered] = useState(false);
+  const [registered,setRegistered]=useState(false);
   const reduce = useReducedMotion();
   const { settings } = useStorefrontSettings();
   const autoplay = playing ?? settings.hero_autoplay;
@@ -26,7 +28,7 @@ export default function HeroCarousel() {
       if (!active) return;
       // Ignore only untouched starter content while migration 004 is pending.
       const campaigns = (data || []).filter(slide => slide.image_url && !isLegacyCampaign(slide));
-      if (campaigns.length) { setSlides(campaigns); setCurrent(0); }
+      if (campaigns.length) { setSlides(campaigns); setCurrent(0); setRegistered(true); }
     });
     return () => { active = false; };
   }, []);
@@ -36,21 +38,23 @@ export default function HeroCarousel() {
     return () => window.clearInterval(timer);
   }, [autoplay, hovered, reduce, slides.length, settings.hero_interval]);
   const slide = slides[current];
+  const campaignId=registered?String(slide.id):slide.image_url.includes('collares')?'reference:necklace':'reference:ring';
+  const impression=useImpression<HTMLDivElement>({name:'campaign_viewed',campaignId,location:'hero'},'campaign:'+campaignId);
   const go = (direction: number) => setCurrent(index => (index + direction + slides.length) % slides.length);
-  return <section className={styles.hero} aria-label="El universo Killaq" aria-roledescription="carrusel" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setHovered(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setHovered(false); }}>
+  return <section className={styles.hero} data-analytics-location='hero' aria-label="El universo Killaq" aria-roledescription="carrusel" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setHovered(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setHovered(false); }}>
     <div className={styles.copy}>
       <span className={styles.eyebrow}><span /> JOYERÍA FINA · PERÚ</span>
       <div className={styles.copyFrame} aria-live={!autoplay ? "polite" : "off"}><AnimatePresence mode="wait" initial={false}><motion.div key={slide.id} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: reduce ? 0 : -6 }} transition={{ duration: reduce ? 0 : .45, ease: [.22, 1, .36, 1] }}>
         <h1>{slide.title}</h1>
         <p className={styles.description}>{slide.subtitle}</p>
-        <div className={styles.ctas}><Link href={safeLink(slide.cta_url)} className={styles.primary}>{slide.cta_text}<ArrowUpRight size={17} /></Link><Link href="/nosotros" className={styles.secondary}>Nuestra esencia <ArrowRight size={16} /></Link></div>
+        <div className={styles.ctas}><Link href={safeLink(slide.cta_url)} className={styles.primary} data-analytics-campaign={campaignId}>{slide.cta_text}<ArrowUpRight size={17} /></Link><Link href="/nosotros" className={styles.secondary}>Nuestra esencia <ArrowRight size={16} /></Link></div>
       </motion.div></AnimatePresence></div>
       <div className={styles.bottom}>
         <div className={styles.pagination}><span>{String(current + 1).padStart(2, "0")}</span><div className={styles.paginationLine} /><small>{slides.length > 1 ? String(slides.length).padStart(2, "0") : "KILLAQ"}</small>{slides.length > 1 && <><button type="button" onClick={() => go(-1)} aria-label="Campaña anterior"><ArrowLeft size={15} /></button><button type="button" onClick={() => go(1)} aria-label="Siguiente campaña"><ArrowRight size={15} /></button><button type="button" onClick={() => setPlaying(!autoplay)} aria-label={autoplay ? "Pausar carrusel" : "Reanudar carrusel"}>{autoplay ? <Pause size={12} /> : <Play size={12} />}</button></>}</div>
         {settings.welcome_enabled && <button type="button" className={styles.replay} onClick={() => window.dispatchEvent(new Event("killaq:replay-intro"))}><Play size={11} /> Ver bienvenida</button>}
       </div>
     </div>
-    <div className={styles.visual}>
+    <div className={styles.visual} ref={impression}>
       <AnimatePresence initial={false}>{[slide].map(item => {
         const campaign = item.image_url === "/images/killaq-ring-v2.png" || item.image_url === "/images/categories/collares-v1.webp";
         const background = resolveHeroBackground(item.background_style, item.jewelry_tone);
